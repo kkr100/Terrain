@@ -1,0 +1,16 @@
+# Godot 4 generated files (the editor recreates these automatically)
+.godot/
+/android/
+
+# Godot-specific ignores
+*.translation
+export.cfg
+export_credentials.cfg
+
+# Builds
+/build/
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+*.tmp

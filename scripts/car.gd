@@ -26,6 +26,9 @@ extends VehicleBody3D
 
 ## The name of the ground under the car ("Dirt", "Mud", ...), for the HUD.
 var surface_name := ""
+## When false the car ignores the keys and holds its brakes. The race turns
+## this off during the countdown and after the finish.
+var controls_enabled := true
 
 var _spawn_transform: Transform3D
 var _wheels: Array[VehicleWheel3D] = []
@@ -47,6 +50,9 @@ func _physics_process(delta: float) -> void:
 	# The action names are set up in Project > Project Settings > Input Map.
 	var throttle := Input.get_axis("brake", "accelerate")
 	var steer_input := Input.get_axis("steer_right", "steer_left")
+	if not controls_enabled:
+		throttle = 0.0
+		steer_input = 0.0
 
 	var speed := get_forward_speed()
 
@@ -67,7 +73,7 @@ func _physics_process(delta: float) -> void:
 			# Almost stopped or rolling back: "back" means reverse, at half power.
 			engine_force = max_engine_force * 0.5 * throttle
 
-	if Input.is_action_pressed("handbrake"):
+	if Input.is_action_pressed("handbrake") or not controls_enabled:
 		brake = max_brake
 
 	# --- Steering ----------------------------------------------------------
@@ -140,7 +146,15 @@ func flip_upright() -> void:
 	_place(new_transform)
 
 
-## Move the car back to where the level started.
+## Choose where respawn() puts the car: at "where", pointing towards "facing".
+func set_respawn_point(where: Vector3, facing: Vector3) -> void:
+	var new_transform := Transform3D(Basis.IDENTITY, where)
+	facing.y = where.y  # Look level, not up or down a hill.
+	# looking_at points -Z at the target, so we look "backwards" to get +Z forward.
+	_spawn_transform = new_transform.looking_at(where - (facing - where), Vector3.UP)
+
+
+## Move the car back to where the level started, or to the last checkpoint.
 func respawn() -> void:
 	_place(_spawn_transform)
 

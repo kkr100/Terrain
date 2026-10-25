@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/checkpoint.gd" id="1_checkpoint"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_zone"]
+height = 10.0
+radius = 6.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glow"]
+resource_local_to_scene = true
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_color = Color(1, 0.8, 0.1, 0.45)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
+top_radius = 1.2
+bottom_radius = 1.2
+height = 80.0
+cap_top = false
+cap_bottom = false
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+inner_radius = 5.4
+outer_radius = 6.0
+
+[node name="Checkpoint" type="Area3D"]
+script = ExtResource("1_checkpoint")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+shape = SubResource("CylinderShape3D_zone")
+
+[node name="Beam" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)
+material_override = SubResource("StandardMaterial3D_glow")
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_beam")
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+material_override = SubResource("StandardMaterial3D_glow")
+cast_shadow = 0
+mesh = SubResource("TorusMesh_ring")

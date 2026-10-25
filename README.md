@@ -4,8 +4,9 @@ A learning prototype of an offroad driving game, inspired by games like
 "Over the Hill". It's built with [Godot 4](https://godotengine.org/), a free
 and open source game engine.
 
-Right now you can drive a small 4x4 around a hilly offroad map with dirt, mud
-and rock, each with its own grip. Game goals come later.
+You drive a small 4x4 across a hilly offroad map with dirt, mud and rock,
+each with its own grip. Your goal: drive through 8 checkpoints and the
+finish line, in order, as fast as you can. The game remembers your best time.
 
 ## How to open and run it
 
@@ -15,8 +16,25 @@ and rock, each with its own grip. Game goals come later.
 3. Start Godot. In the Project Manager, click **Import**, pick the
    `project.godot` file in this folder, then click **Import & Edit**.
 4. Press **F5** (or the ▶ play button in the top right) to run the game.
-   A window opens with a red car in a valley between hills. Close the window or press
-   **F8** to stop it.
+   The main menu opens. Click **Start** (or press Enter) to begin a race.
+   Close the window or press **F8** to stop it.
+
+Want to skip the menu while you're working on the map or the car? Open
+`scenes/main.tscn` and press **F6** (or the "Run current scene" button). That
+runs just the scene you have open.
+
+## How to play
+
+After a "3, 2, 1, GO!" countdown, drive to the **bright yellow beam of
+light**. That's the next checkpoint. Drive through the ring at its foot and
+the beam moves on to the next one. The faint white beams show where the
+later checkpoints are, so you can plan your route. The last one, the
+**finish**, glows green.
+
+The top-right corner shows which checkpoint you're on, how far away it is,
+and your time. There's no road: pick your own way over the hills, and watch
+out for mud, which is slippery and slow. If you fall off the world, you're
+put back at the last checkpoint you passed.
 
 ## Controls
 
@@ -27,6 +45,7 @@ and rock, each with its own grip. Game goals come later.
 | **A D** or **← →** | Steer |
 | **Space** | Handbrake |
 | **R** | Flip the car back onto its wheels |
+| **Esc** or **P** | Pause (and unpause) |
 
 The map is surrounded by steep rock walls. If the car ever falls through the
 world, it's put back at the start.
@@ -42,11 +61,20 @@ so you never need to commit it.
 | File | What it is |
 | --- | --- |
 | `project.godot` | The project's settings: its name, window size, and which scene starts first. Godot edits this for you when you change **Project > Project Settings**. |
-| `scenes/main.tscn` | The main scene, the first thing that loads when the game runs. It holds the map, the car, the camera and the speed display. |
+| `export_presets.cfg` | The settings for making a Windows, Linux or macOS build. See "Making a desktop build" below. |
+| `scenes/main_menu.tscn` | The main menu, the first thing that loads when the game runs. |
+| `scenes/main.tscn` | The race: the map, the car, the checkpoints, the camera and the HUD. |
+| `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). `main.tscn` uses it nine times. |
+| `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
 | `scenes/car.tscn` | The car on its own: body, wheels and suspension. |
 | `scripts/car.gd` | Reads the keyboard and tells the car to drive, brake and steer. |
 | `scripts/chase_camera.gd` | Makes the camera follow the car from behind. |
-| `scripts/hud.gd` | Shows the speed, the ground you're on, and the controls. |
+| `scripts/hud.gd` | Shows the speed, the race info, the countdown and the finish screen. |
+| `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
+| `scripts/checkpoint.gd` | Notices when the car drives through a checkpoint, and changes its colour. |
+| `scripts/best_time.gd` | Saves and loads your best time. |
+| `scripts/main_menu.gd` | Makes the Start and Quit buttons work. |
+| `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
 | `scripts/terrain.gd` | Builds the hills, paints the dirt, mud and rock, and tells the car which surface is under a wheel. |
 | `scripts/surface_type.gd` | Describes one kind of ground: its name, grip, drag and colour. |
 | `.gitignore` | Tells git to skip Godot's generated cache files. |
@@ -69,7 +97,10 @@ Main (Node3D)              the root; every other node hangs under it
 ├── Terrain (StaticBody3D)  the hilly ground; scripts/terrain.gd builds it
 ├── Car                    the car, an instance of scenes/car.tscn
 ├── ChaseCamera (Camera3D) what the player sees; it follows the car
-└── HUD (CanvasLayer)      2D text drawn on top of the 3D world
+├── Checkpoints (Node3D)   holds Checkpoint1 … Checkpoint8 and Finish
+├── Race (Node)            the rules; scripts/race.gd
+├── HUD (CanvasLayer)      2D text and the finish screen, drawn on top of the 3D world
+└── PauseMenu              an instance of scenes/pause_menu.tscn
 ```
 
 Click any node and its settings show up in the **Inspector** on the right.
@@ -202,9 +233,117 @@ faster you go. The HUD shows the surface most of your wheels are on.
 - Turn mud into deep swamp: raise Mud's `drag` to 1.0.
 - Make mountains: raise `hill_height` to 60 and lower `hill_frequency`.
 
+## How the game works
+
+### Scenes and menus
+
+The game is three scenes that take turns on screen:
+
+```
+main_menu.tscn  --Start-->  main.tscn  --Main menu (pause or finish)-->  main_menu.tscn
+```
+
+**Project > Project Settings > Application > Run > Main Scene** says which
+one opens first (the menu). A script switches to another scene with
+`get_tree().change_scene_to_file("res://scenes/main.tscn")`, and
+`get_tree().reload_current_scene()` starts the same one over, which is all
+"Restart" does.
+
+Menus are built from **Control** nodes, Godot's 2D user-interface nodes.
+Open `scenes/main_menu.tscn`: a `CenterContainer` keeps a `VBoxContainer` in
+the middle of the screen, and the `VBoxContainer` stacks the title, the
+buttons and the best time on top of each other. Containers do the layout
+for you, so it still looks right when you resize the window.
+
+A button sends a **signal** called `pressed` when you click it. A signal is
+Godot's way of saying "this just happened". The menu script connects that
+signal to a function:
+
+```gdscript
+_start_button.pressed.connect(_on_start_pressed)
+```
+
+### Pausing
+
+`get_tree().paused = true` freezes the game. Every node has a
+**Process > Mode** setting in the Inspector. Nodes set to "Inherit" or
+"Pausable" (almost all of them) stop when the game is paused. The
+`PauseMenu` is set to "Always", so it keeps running and can hear you press
+Esc again. The race timer is a normal pausable node, so it stops too.
+
+### Checkpoints and the timer
+
+Each checkpoint is an **Area3D**: an invisible zone that doesn't block
+anything but sends a `body_entered` signal when a physics body drives into
+it. `checkpoint.gd` checks that the body is a car and sends its own
+`reached` signal. `race.gd` listens to all of them, counts which one is
+next, and tells each one how to look (next, waiting or done).
+
+The timer is just a number: every frame, `race.gd` adds `delta` (the
+seconds since the last frame) to `elapsed`. When you finish, it compares
+your time with the best one and saves it to `user://save.cfg`. `user://` is
+a folder Godot gives every game for save files, so it works the same on
+every computer.
+
+### Make your own route
+
+Select a checkpoint under `Checkpoints` in `scenes/main.tscn` and drag it
+somewhere else with the move tool, or type new X and Z values in the
+Inspector. You don't need to get the height right: when the race starts,
+each checkpoint is moved onto the ground. The order of the checkpoints in
+the Scene panel is the order you drive them in, and the last one is the
+finish. To add one, right-click a checkpoint and pick **Duplicate**.
+
+If you change `map_seed` on the Terrain, move the checkpoints too, or some
+may end up on top of a cliff.
+
+## Making a desktop build
+
+A "build" (Godot calls it an **export**) turns the project into a normal
+program that anyone can run without installing Godot. The settings for
+Windows, Linux and macOS are already set up in `export_presets.cfg`.
+
+1. **Install the export templates (once).** These are the ready-made game
+   engine programs that Godot packs your game into. In Godot, open
+   **Editor > Manage Export Templates** and click **Download and Install**.
+   It's a big download (about 1 GB), and the version must match your Godot.
+2. Open **Project > Export**. You'll see three presets on the left:
+   **Windows Desktop**, **Linux** and **macOS**.
+3. Pick the one for your computer and click **Export Project…**. Untick
+   **Export With Debug** for a faster game without debug tools, then click
+   **Save**. The build goes into the `build/` folder, which git ignores.
+4. Run it:
+   - **Windows:** double-click `build/windows/Terrain.exe`. Windows may warn
+     about an unknown publisher, because the game isn't signed. Click
+     **More info > Run anyway**.
+   - **Linux:** run `build/linux/Terrain.x86_64`.
+   - **macOS:** unzip `build/macos/Terrain.zip` and open `Terrain.app`. The
+     first time, macOS blocks apps from unknown developers: right-click the
+     app, choose **Open**, then **Open** again.
+
+You can export for any platform from any computer, so a Linux machine can
+make the Windows build. To share the game, zip the file and send it: the
+game data is packed inside the program, so it's a single file.
+
+You can also export from the command line, without opening the editor:
+
+```sh
+godot --headless --export-release "Linux" build/linux/Terrain.x86_64
+godot --headless --export-release "Windows Desktop" build/windows/Terrain.exe
+godot --headless --export-release "macOS" build/macos/Terrain.zip
+```
+
+The macOS build needs the "ETC2 ASTC" texture format, for Apple Silicon
+Macs. That's why it's turned on in
+**Project Settings > Rendering > Textures > VRAM Compression**.
+
 ## Roadmap
 
 1. ✅ Project setup with an empty 3D scene
 2. ✅ A drivable car
 3. ✅ Offroad terrain
-4. Game goals, a menu and a desktop build
+4. ✅ Game goals, a menu and a desktop build
+
+Ideas for what's next: sound for the engine and the wheels, a mini-map or
+an arrow pointing to the next checkpoint, more maps with different seeds,
+or a gamepad (add buttons to the actions in the Input Map).

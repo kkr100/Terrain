@@ -1,6 +1,6 @@
 [gd_scene load_steps=25 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="1_car"]
+[ext_resource type="Script" path="res://scripts/car_spawner.gd" id="1_spawner"]
 [ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="4_terrain"]
@@ -93,14 +93,17 @@ bark_normal = ExtResource("12_bark_n")
 rock_scenes = Array[PackedScene]([ExtResource("13_rock07"), ExtResource("14_rock09")])
 boulder_scenes = Array[PackedScene]([ExtResource("15_boulder")])
 
-[node name="Car" parent="." instance=ExtResource("1_car")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+[node name="CarSpawner" type="Marker3D" parent="." node_paths=PackedStringArray("camera", "race", "hud")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("1_spawner")
+camera = NodePath("../ChaseCamera")
+race = NodePath("../Race")
+hud = NodePath("../HUD")
 
-[node name="ChaseCamera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+[node name="ChaseCamera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7)
 current = true
 script = ExtResource("2_camera")
-target = NodePath("../Car")
 
 [node name="Checkpoints" type="Node3D" parent="."]
 
@@ -131,15 +134,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 30)
 [node name="Finish" parent="Checkpoints" instance=ExtResource("6_checkpoint")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -14)
 
-[node name="Race" type="Node" parent="." node_paths=PackedStringArray("car", "terrain", "checkpoints_root")]
+[node name="Race" type="Node" parent="." node_paths=PackedStringArray("terrain", "checkpoints_root")]
 script = ExtResource("7_race")
-car = NodePath("../Car")
 terrain = NodePath("../Terrain")
 checkpoints_root = NodePath("../Checkpoints")
 
-[node name="HUD" type="CanvasLayer" parent="." node_paths=PackedStringArray("car", "race")]
+[node name="HUD" type="CanvasLayer" parent="." node_paths=PackedStringArray("race")]
 script = ExtResource("3_hud")
-car = NodePath("../Car")
 race = NodePath("../Race")
 
 [node name="SpeedLabel" type="Label" parent="HUD"]

@@ -2,8 +2,8 @@ extends CanvasLayer
 ## Everything drawn on top of the 3D world: speed, race info, the countdown
 ## and the finish screen.
 
-## The car whose speed we show. Set this in the Inspector.
-@export var car: VehicleBody3D
+## The car whose speed we show. CarSpawner fills this in.
+@export var car: Car
 ## The race whose time and checkpoints we show.
 @export var race: Race
 
@@ -31,7 +31,8 @@ func _process(_delta: float) -> void:
 	# linear_velocity is in metres per second. Multiply by 3.6 for km/h.
 	var kmh := absf(car.get_forward_speed()) * 3.6
 	var ground: String = car.surface_name if car.surface_name != "" else "In the air"
-	_speed_label.text = "%d km/h   %s\n%s" % [roundi(kmh), ground, CONTROLS]
+	_speed_label.text = "%d km/h   gear %d   %d rpm   %s\n%s" % [roundi(kmh), car.gear,
+			roundi(car.rpm / 100.0) * 100, ground, CONTROLS]
 
 	var total := race.checkpoints.size()
 	if race.is_finished:

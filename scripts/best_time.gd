@@ -1,5 +1,6 @@
 class_name BestTime
-## Saves and loads the fastest finish time, so it's still there next time you play.
+## Saves and loads the fastest finish time for each car, so it's still there
+## next time you play.
 ##
 ## "user://" is a folder Godot gives every game for its save files. On Windows
 ## it's in %APPDATA%\Godot\app_userdata\Terrain, on Linux in
@@ -9,18 +10,19 @@ class_name BestTime
 const SAVE_PATH := "user://save.cfg"
 
 
-## The best time in seconds, or -1 if you haven't finished yet.
-static func read() -> float:
+## The best time in seconds with the car called car_id ("rally", "suv", ...),
+## or -1 if you haven't finished with that car yet.
+static func read(car_id: String) -> float:
 	var file := ConfigFile.new()
 	if file.load(SAVE_PATH) != OK:
 		return -1.0
-	return file.get_value("race", "best_time", -1.0)
+	return file.get_value("best_times", car_id, -1.0)
 
 
-static func write(seconds: float) -> void:
+static func write(car_id: String, seconds: float) -> void:
 	var file := ConfigFile.new()
 	file.load(SAVE_PATH)  # Keep anything else that's already saved.
-	file.set_value("race", "best_time", seconds)
+	file.set_value("best_times", car_id, seconds)
 	file.save(SAVE_PATH)
 
 

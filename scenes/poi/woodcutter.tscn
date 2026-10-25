@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/structure-roof.glb" id="3_structure_roof"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/workbench.glb" id="4_workbench"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/tree-log.glb" id="5_tree_log"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/resource-wood.glb" id="6_resource_wood"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/resource-planks.glb" id="7_resource_planks"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/chest.glb" id="8_chest"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stump_old.glb" id="9_stump_old"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/log_stack.glb" id="10_log_stack"]
+
+[node name="Woodcutter" type="Node3D"]
+script = ExtResource("1_poi")
+id = "woodcutter"
+display_name = "Woodcutter's camp"
+description = "Fresh logs, a sharp axe and a roof against the rain."
+discover_radius = 28.0
+flat_radius = 16.0
+
+[node name="Shelter" parent="." instance=ExtResource("3_structure_roof")]
+transform = Transform3D(8.69333, 0, 2.32937, 0, 9, 0, -2.32937, 0, 8.69333, 0, 0, 0)
+
+[node name="Workbench" parent="." instance=ExtResource("4_workbench")]
+transform = Transform3D(6.76148, 0, 1.81173, 0, 7, 0, -1.81173, 0, 6.76148, 0, 0, 0)
+
+[node name="LogA" parent="." instance=ExtResource("5_tree_log")]
+transform = Transform3D(1.56283, 0, 8.86327, 0, 9, 0, -8.86327, 0, 1.56283, 5.5, 1, 2)
+
+[node name="LogB" parent="." instance=ExtResource("5_tree_log")]
+transform = Transform3D(2.32937, 0, 8.69333, 0, 9, 0, -8.69333, 0, 2.32937, 6, 1, 4.6)
+
+[node name="Wood" parent="." instance=ExtResource("6_resource_wood")]
+transform = Transform3D(8.86327, 0, 1.56283, 0, 9, 0, -1.56283, 0, 8.86327, -4, 0, 3.5)
+
+[node name="Planks" parent="." instance=ExtResource("7_resource_planks")]
+transform = Transform3D(6.57785, 0, 2.39414, 0, 7, 0, -2.39414, 0, 6.57785, -5, 0, -2)
+
+[node name="Chest" parent="." instance=ExtResource("8_chest")]
+transform = Transform3D(5.90885, 0, -1.04189, 0, 6, 0, 1.04189, 0, 5.90885, 1.5, 0, -3)
+
+[node name="Stump" parent="." instance=ExtResource("9_stump_old")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -2, 0, 6.5)
+
+[node name="LogStack" parent="." instance=ExtResource("10_log_stack")]
+transform = Transform3D(0, 0, 5, 0, 5, 0, -5, 0, 0, -7, 0, 0.5)

@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/platform_stone.glb" id="3_platform_stone"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/statue_obelisk.glb" id="4_statue_obelisk"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/statue_columnDamaged.glb" id="5_statue_columnDamaged"]
+
+[node name="Obelisk" type="Node3D"]
+script = ExtResource("1_poi")
+id = "obelisk"
+display_name = "Lonely obelisk"
+description = "An ancient stone needle pointing at the sky."
+discover_radius = 30.0
+flat_radius = 14.0
+
+[node name="Base" parent="." instance=ExtResource("3_platform_stone")]
+transform = Transform3D(11, 0, 0, 0, 11, 0, 0, 0, 11, 0, 0, 0)
+
+[node name="Obelisk" parent="." instance=ExtResource("4_statue_obelisk")]
+transform = Transform3D(15.7569, 0, 2.77837, 0, 16, 0, -2.77837, 0, 15.7569, 0, 0.6, 0)
+
+[node name="ColumnA" parent="." instance=ExtResource("5_statue_columnDamaged")]
+transform = Transform3D(4.5, 0, 0, 0, 4.5, 0, 0, 0, 4.5, 6.5, 0, 5)
+
+[node name="ColumnB" parent="." instance=ExtResource("5_statue_columnDamaged")]
+transform = Transform3D(1.53909, 0, 4.22862, 0, 4.5, 0, -4.22862, 0, 1.53909, -6.5, 0, -5)

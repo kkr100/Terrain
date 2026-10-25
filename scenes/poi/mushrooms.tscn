@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/mushroom_redTall.glb" id="3_mushroom_redTall"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/mushroom_tanTall.glb" id="4_mushroom_tanTall"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/mushroom_redGroup.glb" id="5_mushroom_redGroup"]
+
+[node name="Mushrooms" type="Node3D"]
+script = ExtResource("1_poi")
+id = "mushrooms"
+display_name = "Giant mushroom grove"
+description = "Mushrooms as tall as houses. Better not eat them."
+discover_radius = 28.0
+flat_radius = 14.0
+
+[node name="BigRed" parent="." instance=ExtResource("3_mushroom_redTall")]
+transform = Transform3D(28, 0, 0, 0, 28, 0, 0, 0, 28, 0, 0, 0)
+
+[node name="RedB" parent="." instance=ExtResource("3_mushroom_redTall")]
+transform = Transform3D(6.8404, 0, 18.7938, 0, 20, 0, -18.7938, 0, 6.8404, 5.5, 0, 3)
+
+[node name="RedC" parent="." instance=ExtResource("3_mushroom_redTall")]
+transform = Transform3D(-12.2567, 0, 10.2846, 0, 16, 0, -10.2846, 0, -12.2567, -4.5, 0, 4.5)
+
+[node name="TanA" parent="." instance=ExtResource("4_mushroom_tanTall")]
+transform = Transform3D(20.7846, 0, 12, 0, 24, 0, -12, 0, 20.7846, -3.5, 0, -4.5)
+
+[node name="TanB" parent="." instance=ExtResource("4_mushroom_tanTall")]
+transform = Transform3D(-14.0954, 0, -5.1303, 0, 15, 0, 5.1303, 0, -14.0954, 4.5, 0, -4)
+
+[node name="GroupA" parent="." instance=ExtResource("5_mushroom_redGroup")]
+transform = Transform3D(14, 0, 0, 0, 14, 0, 0, 0, 14, 8, 0, -1)
+
+[node name="GroupB" parent="." instance=ExtResource("5_mushroom_redGroup")]
+transform = Transform3D(0, 0, 12, 0, 12, 0, -12, 0, 0, -8, 0, 0)

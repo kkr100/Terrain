@@ -138,10 +138,11 @@ func _apply_ground() -> void:
 		var wheel := _wheels[i]
 		var surface: SurfaceType = null
 		# get_contact_body() is whatever the wheel is touching. If that thing
-		# is our terrain, ask it which surface is under the wheel.
+		# is a terrain (the race map or the Explore map: both have a
+		# get_surface_at function), ask it which surface is under the wheel.
 		if wheel.is_in_contact():
 			var ground := wheel.get_contact_body()
-			if ground is Terrain:
+			if ground and ground.has_method("get_surface_at"):
 				surface = ground.get_surface_at(wheel.get_contact_point())
 		if surface == null:
 			wheel.wheel_friction_slip = _base_friction[i]

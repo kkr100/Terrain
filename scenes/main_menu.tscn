@@ -39,7 +39,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Box" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(360, 0)
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 theme_override_constants/separation = 14
 
@@ -56,13 +56,27 @@ layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 20
-text = "Drive through every checkpoint as fast as you can."
+text = "An offroad driving game. Pick a mode:"
 horizontal_alignment = 1
 
-[node name="StartButton" type="Button" parent="Center/Box"]
+[node name="RaceButton" type="Button" parent="Center/Box"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Start"
+text = "Point to point"
+
+[node name="ExploreButton" type="Button" parent="Center/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Explore"
+
+[node name="ModeLabel" type="Label" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="QuitButton" type="Button" parent="Center/Box"]
 layout_mode = 2

@@ -1,0 +1,49 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/fence.glb" id="3_fence"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/barrel.glb" id="4_barrel"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/barrel-open.glb" id="5_barrel_open"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/box-large.glb" id="6_box_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/box.glb" id="7_box"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/chest.glb" id="8_chest"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/tent-canvas.glb" id="9_tent_canvas"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/signpost.glb" id="10_signpost"]
+
+[node name="SupplyCache" type="Node3D"]
+script = ExtResource("1_poi")
+id = "supply_cache"
+display_name = "Supply cache"
+description = "Crates, barrels and a locked chest. Someone's been stocking up."
+discover_radius = 26.0
+flat_radius = 14.0
+
+[node name="FenceBack" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 0, 0, -4)
+
+[node name="FenceLeft" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(0, 0, 8, 0, 8, 0, -8, 0, 0, -4, 0, 0)
+
+[node name="FenceRight" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(0, 0, 8, 0, 8, 0, -8, 0, 0, 4, 0, 0)
+
+[node name="Barrel" parent="." instance=ExtResource("4_barrel")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, -2.4, 0, -2.7)
+
+[node name="BarrelOpen" parent="." instance=ExtResource("5_barrel_open")]
+transform = Transform3D(6.06218, 0, 3.5, 0, 7, 0, -3.5, 0, 6.06218, -0.6, 0, -2.9)
+
+[node name="Crate" parent="." instance=ExtResource("6_box_large")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 2.2, 0, -2.2)
+
+[node name="CrateTop" parent="." instance=ExtResource("7_box")]
+transform = Transform3D(6.34415, 0, 2.95833, 0, 7, 0, -2.95833, 0, 6.34415, 2.2, 1.75, -2.6)
+
+[node name="Chest" parent="." instance=ExtResource("8_chest")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, -0.8)
+
+[node name="Tent" parent="." instance=ExtResource("9_tent_canvas")]
+transform = Transform3D(7.79423, 0, 4.5, 0, 9, 0, -4.5, 0, 7.79423, -8, 0, 5)
+
+[node name="Signpost" parent="." instance=ExtResource("10_signpost")]
+transform = Transform3D(7.51754, 0, -2.73616, 0, 8, 0, 2.73616, 0, 7.51754, 6, 0, 6)

@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tent_detailedOpen.glb" id="3_tent_detailedOpen"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/campfire_stones.glb" id="4_campfire_stones"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/log_large.glb" id="5_log_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/log_stack.glb" id="6_log_stack"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/pot_large.glb" id="7_pot_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/bedroll.glb" id="8_bedroll"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/canoe.glb" id="9_canoe"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/sign.glb" id="10_sign"]
+
+[node name="Campsite" type="Node3D"]
+script = ExtResource("1_poi")
+id = "campsite"
+display_name = "Abandoned campsite"
+description = "Someone left in a hurry. The ashes are still warm..."
+discover_radius = 26.0
+flat_radius = 16.0
+
+[node name="Tent" parent="." instance=ExtResource("3_tent_detailedOpen")]
+transform = Transform3D(6.57785, 0, 2.39414, 0, 7, 0, -2.39414, 0, 6.57785, 0, 0, -5)
+
+[node name="Campfire" parent="." instance=ExtResource("4_campfire_stones")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 1, 0, 3)
+
+[node name="LogA" parent="." instance=ExtResource("5_log_large")]
+transform = Transform3D(0.60777, 0, 3.44683, 0, 3.5, 0, -3.44683, 0, 0.60777, 4.5, 0, 3)
+
+[node name="LogB" parent="." instance=ExtResource("5_log_large")]
+transform = Transform3D(3.28892, 0, -1.19707, 0, 3.5, 0, 1.19707, 0, 3.28892, -2.5, 0, 5)
+
+[node name="LogStack" parent="." instance=ExtResource("6_log_stack")]
+transform = Transform3D(3.89711, 0, 2.25, 0, 4.5, 0, -2.25, 0, 3.89711, -6.5, 0, -1)
+
+[node name="Pot" parent="." instance=ExtResource("7_pot_large")]
+transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 2.8, 0, 5.5)
+
+[node name="Bedroll" parent="." instance=ExtResource("8_bedroll")]
+transform = Transform3D(5.90885, 0, 1.04189, 0, 6, 0, -1.04189, 0, 5.90885, 5.5, 0, -3)
+
+[node name="Canoe" parent="." instance=ExtResource("9_canoe")]
+transform = Transform3D(2.25, 0, -3.89711, 0, 4.5, 0, 3.89711, 0, 2.25, -5, 0, -6)
+
+[node name="Sign" parent="." instance=ExtResource("10_sign")]
+transform = Transform3D(4.33013, 0, -2.5, 0, 5, 0, 2.5, 0, 4.33013, 8, 0, 7)

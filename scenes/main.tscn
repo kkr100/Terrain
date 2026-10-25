@@ -132,12 +132,11 @@ rock_scenes = Array[PackedScene]([ExtResource("23_stone_smallA"), ExtResource("2
 boulder_scenes = Array[PackedScene]([ExtResource("30_stone_largeA"), ExtResource("31_stone_largeB"), ExtResource("32_stone_largeC"), ExtResource("33_stone_largeD"), ExtResource("34_stone_largeE"), ExtResource("35_stone_largeF"), ExtResource("36_stone_tallA"), ExtResource("37_stone_tallB"), ExtResource("38_stone_tallC"), ExtResource("39_stone_tallE")])
 bush_scenes = Array[PackedScene]([ExtResource("40_plant_bush"), ExtResource("41_plant_bushLarge"), ExtResource("42_plant_bushDetailed"), ExtResource("43_grass_large")])
 
-[node name="CarSpawner" type="Marker3D" parent="." node_paths=PackedStringArray("camera", "race", "hud")]
+[node name="CarSpawner" type="Marker3D" parent="." node_paths=PackedStringArray("camera", "car_users")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 script = ExtResource("1_spawner")
 camera = NodePath("../ChaseCamera")
-race = NodePath("../Race")
-hud = NodePath("../HUD")
+car_users = [NodePath("../Race"), NodePath("../HUD")]
 
 [node name="ChaseCamera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7)

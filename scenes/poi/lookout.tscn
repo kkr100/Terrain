@@ -1,0 +1,35 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/structure.glb" id="3_structure"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/structure-floor.glb" id="4_structure_floor"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/structure-roof.glb" id="5_structure_roof"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/signpost.glb" id="6_signpost"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/box.glb" id="7_box"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/barrel.glb" id="8_barrel"]
+
+[node name="Lookout" type="Node3D"]
+script = ExtResource("1_poi")
+id = "lookout"
+display_name = "Lookout tower"
+description = "A wooden tower on a hilltop. What a view!"
+discover_radius = 30.0
+flat_radius = 14.0
+
+[node name="Frame" parent="." instance=ExtResource("3_structure")]
+transform = Transform3D(7.72741, 0, 2.07055, 0, 8, 0, -2.07055, 0, 7.72741, 0, 0, 0)
+
+[node name="Floor" parent="." instance=ExtResource("4_structure_floor")]
+transform = Transform3D(7.72741, 0, 2.07055, 0, 8, 0, -2.07055, 0, 7.72741, 0, 4, 0)
+
+[node name="Roof" parent="." instance=ExtResource("5_structure_roof")]
+transform = Transform3D(7.72741, 0, 2.07055, 0, 8, 0, -2.07055, 0, 7.72741, 0, 8.4, 0)
+
+[node name="Signpost" parent="." instance=ExtResource("6_signpost")]
+transform = Transform3D(6.9282, 0, -4, 0, 8, 0, 4, 0, 6.9282, 7, 0, 4)
+
+[node name="Box" parent="." instance=ExtResource("7_box")]
+transform = Transform3D(5.63816, 0, 2.05212, 0, 6, 0, -2.05212, 0, 5.63816, -4.5, 0, 2)
+
+[node name="Barrel" parent="." instance=ExtResource("8_barrel")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, -4, 0, 4.2)

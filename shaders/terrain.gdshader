@@ -31,6 +31,11 @@ uniform float facet_variation : hint_range(0.0, 0.3) = 0.08;
 uniform float dry_patch_size = 40.0;
 // Mud is wet, so it is a bit shinier than grass and rock.
 uniform float mud_roughness : hint_range(0.0, 1.0) = 0.55;
+// How big the grid squares of the mesh are, in metres. The race map uses 1 m
+// squares. The big Explore map (scripts/explore_terrain.gd) uses bigger ones
+// far away and sets this for each chunk. "instance" means every mesh using
+// this material can have its own value.
+instance uniform float facet_size = 1.0;
 
 varying vec3 world_pos;
 
@@ -76,10 +81,11 @@ void fragment() {
 		color = mix(dirt_color.rgb, dry_color.rgb, dry);
 	}
 
-	// 3. Every 1 m grid square is cut into two triangles along the diagonal.
+	// 3. Every grid square is cut into two triangles along the diagonal.
 	// Work out which triangle this pixel is in, and give it its own shade.
-	vec2 cell = floor(world_pos.xz);
-	vec2 inside = world_pos.xz - cell;
+	vec2 grid_pos = world_pos.xz / facet_size;
+	vec2 cell = floor(grid_pos);
+	vec2 inside = grid_pos - cell;
 	float which = step(1.0, inside.x + inside.y);
 	float shade = hash(cell + which * 0.5) * 2.0 - 1.0;
 	color *= 1.0 + shade * facet_variation;

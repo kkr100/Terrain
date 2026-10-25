@@ -1,20 +1,46 @@
 extends Control
-## The first screen you see: start the game, or quit.
+## The first screen you see: pick a mode (which then takes you to the
+## car-select screen), or quit.
 
-@onready var _start_button: Button = $Center/Box/StartButton
+@onready var _race_button: Button = $Center/Box/RaceButton
+@onready var _explore_button: Button = $Center/Box/ExploreButton
 @onready var _best_label: Label = $Center/Box/BestLabel
+@onready var _mode_label: Label = $Center/Box/ModeLabel
 
 
 func _ready() -> void:
-	_start_button.pressed.connect(_on_start_pressed)
+	_race_button.pressed.connect(_on_mode_pressed.bind("point_to_point"))
+	_explore_button.pressed.connect(_on_mode_pressed.bind("explore"))
 	$Center/Box/QuitButton.pressed.connect(get_tree().quit)
+	# Show what each mode is about while its button is focused or hovered.
+	for button: Button in [_race_button, _explore_button]:
+		button.focus_entered.connect(_show_mode_info.bind(button))
+		button.mouse_entered.connect(button.grab_focus)
+
 	var car: Dictionary = CarChoice.selected()
 	var best := BestTime.read(car.id)
-	_best_label.text = "Best time (%s): %s" % [car.name, BestTime.format(best)] if best >= 0.0 else "No best time yet"
-	# Focus Start so you can just press Enter (or use the arrow keys).
-	_start_button.grab_focus()
+	var lines := []
+	lines.append("Best time (%s): %s" % [car.name, BestTime.format(best)] if best >= 0.0 else "No best time yet")
+	var total := Exploration.total_count()
+	if total > 0:
+		lines.append("Places found: %d / %d" % [Exploration.load_found().size(), total])
+	_best_label.text = "\n".join(lines)
+
+	# Focus the mode you played last time, so you can just press Enter.
+	if GameMode.selected().id == "explore":
+		_explore_button.grab_focus()
+	else:
+		_race_button.grab_focus()
 
 
-func _on_start_pressed() -> void:
+func _show_mode_info(button: Button) -> void:
+	var id := "explore" if button == _explore_button else "point_to_point"
+	for mode in GameMode.MODES:
+		if mode.id == id:
+			_mode_label.text = mode.description
+
+
+func _on_mode_pressed(id: String) -> void:
+	GameMode.select(id)
 	# Swap this whole menu scene for the car-select screen.
 	get_tree().change_scene_to_file("res://scenes/car_select.tscn")

@@ -5,9 +5,14 @@ A learning prototype of an offroad driving game, inspired by games like
 and open source game engine.
 
 Pick one of three cars, a light rally hatch, a trail SUV or a heavy pickup,
-and drive it across a hilly offroad map with dirt, mud and rock, each with
-its own grip. Your goal: drive through 8 checkpoints and the finish line, in
-order, as fast as you can. The game remembers your best time with each car.
+and drive it across hilly offroad country with dirt, mud and rock, each with
+its own grip. There are two ways to play:
+
+- **Point to point:** drive through 8 checkpoints and the finish line, in
+  order, as fast as you can. The game remembers your best time with each car.
+- **Explore:** roam a huge map, 2.5 km across (ten times wider than the race
+  map), and find 12 hidden places: a campsite, an old wreck, a lookout tower,
+  standing stones and more. The game remembers which ones you found.
 
 ## How to open and run it
 
@@ -17,13 +22,14 @@ order, as fast as you can. The game remembers your best time with each car.
 3. Start Godot. In the Project Manager, click **Import**, pick the
    `project.godot` file in this folder, then click **Import & Edit**.
 4. Press **F5** (or the ▶ play button in the top right) to run the game.
-   The main menu opens. Click **Start** (or press Enter), pick a car, then
-   click **Drive!** to begin a race.
+   The main menu opens. Click **Point to point** or **Explore** (or press
+   Enter), pick a car, then click **Drive!**.
    Close the window or press **F8** to stop it.
 
 Want to skip the menu while you're working on the map or the car? Open
-`scenes/main.tscn` and press **F6** (or the "Run current scene" button). That
-runs just the scene you have open.
+`scenes/main.tscn` (the race) or `scenes/explore.tscn` (Explore) and press
+**F6** (or the "Run current scene" button). That runs just the scene you have
+open.
 
 ## How to play
 
@@ -47,6 +53,7 @@ put back at the last checkpoint you passed.
 | **A D** or **← →** | Steer |
 | **Space** | Handbrake |
 | **R** | Flip the car back onto its wheels |
+| **M** | Open or close the map (Explore mode) |
 | **Esc** or **P** | Pause (and unpause) |
 
 The map is surrounded by steep rock walls. If the car ever falls through the
@@ -66,6 +73,8 @@ so you never need to commit it.
 | `export_presets.cfg` | The settings for making a Windows, Linux or macOS build. See "Making a desktop build" below. |
 | `scenes/main_menu.tscn` | The main menu, the first thing that loads when the game runs. |
 | `scenes/main.tscn` | The race: the map, the car, the checkpoints, the camera and the HUD. |
+| `scenes/explore.tscn` | Explore mode: the big map, the points of interest, the camera and its HUD. |
+| `scenes/poi/` | The 12 points of interest, one small scene each. |
 | `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). `main.tscn` uses it nine times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
 | `scenes/car_select.tscn` | The car-select screen, with a 3D preview of each car. |
@@ -80,7 +89,17 @@ so you never need to commit it.
 | `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
 | `scripts/checkpoint.gd` | Notices when the car drives through a checkpoint, and changes its colour. |
 | `scripts/best_time.gd` | Saves and loads your best time with each car. |
-| `scripts/main_menu.gd` | Makes the Start and Quit buttons work. |
+| `scripts/main_menu.gd` | Makes the mode buttons and Quit work. |
+| `scripts/game_mode.gd` | The list of modes, and which one you picked. |
+| `scripts/explore_terrain.gd` | Builds the big Explore map in chunks, with less detail far away. |
+| `scripts/explore_nature.gd` | Trees, rocks and bushes on the big map, built around the car. |
+| `scripts/nature_models.gd` | Shared helpers for loading and repainting Kenney's nature models. |
+| `scripts/point_of_interest.gd` | One place to discover: its name, description and how close you must get. |
+| `scripts/tint_model.gd` | Tints a model, for example to make a car look rusty. |
+| `scripts/exploration.gd` | Explore mode's rules: notices when you find a place, and saves it. |
+| `scripts/explore_hud.gd` | Explore mode's HUD: speed, places found, the "Discovered!" message. |
+| `scripts/compass.gd` | The compass strip at the top of the screen in Explore mode. |
+| `scripts/explore_map.gd` | The map screen (M) in Explore mode. |
 | `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
 | `scripts/terrain.gd` | Builds the hills, paints the dirt, mud and rock, and tells the car which surface is under a wheel. |
 | `scripts/surface_type.gd` | Describes one kind of ground: its name, grip, drag and colour. |
@@ -392,11 +411,17 @@ by itself every time the game starts).
 
 ### Scenes and menus
 
-The game is four scenes that take turns on screen:
+The game is a few scenes that take turns on screen:
 
 ```
-main_menu.tscn  --Start-->  car_select.tscn  --Drive!-->  main.tscn  --Main menu-->  main_menu.tscn
+                    Point to point                          --> main.tscn     (the race)
+main_menu.tscn  ------------------->  car_select.tscn  --Drive!
+                    Explore                                 --> explore.tscn  (free roam)
 ```
+
+The mode button you click is saved by `scripts/game_mode.gd`. The
+car-select screen shows it in its title, and "Drive!" loads that mode's
+scene. "Main menu" in the pause menu goes back to the start.
 
 The car-select screen shows the real car scene inside a **SubViewport**: a
 small, separate 3D world (with its own light, floor and camera) drawn inside
@@ -420,8 +445,11 @@ Godot's way of saying "this just happened". The menu script connects that
 signal to a function:
 
 ```gdscript
-_start_button.pressed.connect(_on_start_pressed)
+_race_button.pressed.connect(_on_mode_pressed.bind("point_to_point"))
 ```
+
+`bind(...)` adds an extra value to the call, so both mode buttons can use
+the same function and it still knows which one was pressed.
 
 ### Pausing
 
@@ -457,6 +485,103 @@ finish. To add one, right-click a checkpoint and pick **Duplicate**.
 
 If you change `map_seed` on the Terrain, move the checkpoints too, or some
 may end up on top of a cliff.
+
+## How Explore mode works
+
+Open `scenes/explore.tscn`. It looks a lot like `main.tscn`, but with a much
+bigger map and no checkpoints:
+
+```
+Explore (Node3D)
+├── WorldEnvironment, Sun
+├── Terrain (StaticBody3D)      the 2.5 km map; scripts/explore_terrain.gd
+├── PointsOfInterest (Node3D)   the 12 places to find (scenes/poi/*.tscn)
+├── Nature (Node3D)             trees, rocks, bushes; scripts/explore_nature.gd
+├── CarSpawner, ChaseCamera     the same as in the race
+├── Exploration (Node)          the rules; scripts/exploration.gd
+├── HUD (CanvasLayer)           speed, "Places found", compass, messages, map
+└── PauseMenu
+```
+
+### A map ten times bigger
+
+The race map is 256 × 256 m with a point every metre: 66 000 points, built
+all at once. The Explore map is 2560 × 2560 m. Built the same way it would be
+6.5 million points, which would take ages to build and be far too heavy to
+draw. So it uses two tricks that nearly every open-world game uses:
+
+- **Chunks.** The map is cut into 20 × 20 squares of 128 m, and each one is
+  built on its own. They're built on a **background thread**
+  (`WorkerThreadPool`), so the game keeps running smoothly while new ground
+  is made.
+- **Level of detail (LOD).** The chunk you're in, and the ones next to it,
+  get a point every metre. Further out a point every 2 m is enough, then 4,
+  8 and 16 m. From far away you can't tell, but the far chunks are only 9 × 9
+  points, so the whole map can be on screen at once and you can see the
+  mountains on the other side. As you drive, chunks near you are rebuilt
+  with more detail, and the ones you leave get simpler again.
+
+Where a detailed chunk meets a simpler one, their edges don't line up
+exactly, so each chunk has a **skirt**: a strip of wall hanging down from its
+edges that hides any crack. Only the detailed chunks around the car get
+**collision** (a `HeightMapShape3D`), because that's the only place the car
+can touch.
+
+The shape of the land comes from `height_at(x, z)` in
+`explore_terrain.gd`: a slow noise for big mountains and wide flat valleys,
+a faster one for hills on top, a flat start, flat ground around every point
+of interest (and a bowl for the pond), and walls at the edge. Because it's a
+plain function of x and z, every chunk agrees with its neighbours, and the
+car, the trees and the map screen can all ask it for the height anywhere.
+
+The trees and rocks work the same way (`explore_nature.gd`), in cells of
+256 m: only the 5 × 5 cells around you exist, and only the 3 × 3 closest get
+collision. Each cell has its own random seed, made from its position, so if
+you drive away and come back, the same trees grow in the same spots.
+
+In the editor the Terrain is drawn at low detail, so you can see the whole
+map. Settings worth trying on the `Terrain` node:
+
+| Setting | What it does |
+| --- | --- |
+| `map_seed` | Any number gives a different map. Move the points of interest too! |
+| `mountain_height`, `mountain_frequency` | How tall, and how wide apart, the mountains are. |
+| `hill_height`, `hill_frequency` | The smaller hills on top. |
+| `view_chunks`, `lod_distances` | How far you see, and where detail drops. |
+
+### Points of interest
+
+Each place is a small scene in `scenes/poi/`, made of Kenney models (from
+the Nature, Survival and Car kits), moved, turned and scaled by hand. Open
+`scenes/poi/campsite.tscn` to see one. The root node has
+`scripts/point_of_interest.gd`, with an `id`, a `display_name`, a
+`description`, how close you need to get (`discover_radius`), and how much
+ground to flatten around it (`flat_radius`). When the game starts it gives
+every big model a simple collision shape, so you bump into the tent instead
+of driving through it.
+
+`scripts/exploration.gd` checks every frame how far the car is from each
+place you haven't found. Get close enough and it's yours: it plays a little
+chime (made in code, like the engine sound), shows "Discovered!", and saves
+the id to `user://save.cfg`, so next time you play you keep exploring where
+you left off. The main menu shows how many you've found.
+
+To find them:
+
+- **The compass** at the top shows a **?** for every place you haven't found
+  within 700 m, with its distance. It turns into a **!** when you're close.
+- **The map** (press **M**) shows the whole land, where you are, the places
+  you found by name, and a **?** where the others are. Set
+  `show_undiscovered` on the HUD's `Map` node to off to make it harder.
+
+To add your own place, duplicate one of the scenes in `scenes/poi/`, change
+its models and give it a new `id`, then drag it under `PointsOfInterest` in
+`scenes/explore.tscn` and set its X and Z. It's moved onto the ground when
+the game starts.
+
+To start over, delete `save.cfg` from the game's `user://` folder (the top of
+`scripts/best_time.gd` says where that is on your computer). That also clears
+your best times.
 
 ## Making a desktop build
 
@@ -505,9 +630,11 @@ Macs. That's why it's turned on in
 3. ✅ Offroad terrain
 4. ✅ Game goals, a menu and a desktop build
 
-Since then: real ground textures, trees and rocks, and three cars to pick
-from, each with its own engine sound.
+Since then: real ground textures, trees and rocks, three cars to pick
+from, each with its own engine sound, and an Explore mode on a map ten times
+wider.
 
-Ideas for what's next: grass and small plants on the ground, sound for the wheels and crashes, a mini-map or
-an arrow pointing to the next checkpoint, more maps with different seeds,
-or a gamepad (add buttons to the actions in the Input Map).
+Ideas for what's next: grass and small plants on the ground, sound for the
+wheels and crashes, an arrow pointing to the next checkpoint, rivers and
+lakes on the Explore map, more places to discover, or a gamepad (add buttons
+to the actions in the Input Map).

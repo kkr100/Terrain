@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/canoe.glb" id="3_canoe"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/lily_large.glb" id="4_lily_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/campfire-fishing-stand.glb" id="5_campfire_fishing_stand"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/log_large.glb" id="6_log_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/campfire-pit.glb" id="7_campfire_pit"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_water"]
+top_radius = 12.6
+bottom_radius = 12.6
+height = 0.2
+radial_segments = 24
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
+transparency = 1
+albedo_color = Color(0.25, 0.55, 0.75, 0.8)
+roughness = 0.15
+
+[node name="Pond" type="Node3D"]
+script = ExtResource("1_poi")
+id = "pond"
+display_name = "Fishing pond"
+description = "A quiet pond. A perfect spot to rest the engine."
+discover_radius = 30.0
+flat_radius = 20.0
+basin_depth = 2.0
+
+[node name="Canoe" parent="." groups=["no_collision"] instance=ExtResource("3_canoe")]
+transform = Transform3D(3.83022, 0, 3.21394, 0, 5, 0, -3.21394, 0, 3.83022, 3, -0.62, 2)
+
+[node name="LilyA" parent="." groups=["no_collision"] instance=ExtResource("4_lily_large")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -4, -0.6, 1)
+
+[node name="LilyB" parent="." groups=["no_collision"] instance=ExtResource("4_lily_large")]
+transform = Transform3D(0.69459, 0, 3.93923, 0, 4, 0, -3.93923, 0, 0.69459, -2, -0.6, -5)
+
+[node name="LilyC" parent="." groups=["no_collision"] instance=ExtResource("4_lily_large")]
+transform = Transform3D(-4.33013, 0, 2.5, 0, 5, 0, -2.5, 0, -4.33013, 6, -0.6, -3)
+
+[node name="FishingStand" parent="." instance=ExtResource("5_campfire_fishing_stand")]
+transform = Transform3D(2.73616, 0, -7.51754, 0, 8, 0, 7.51754, 0, 2.73616, 15, 0, 4)
+
+[node name="Log" parent="." instance=ExtResource("6_log_large")]
+transform = Transform3D(3.44683, 0, 0.60777, 0, 3.5, 0, -0.60777, 0, 3.44683, 15.5, 0, 8.5)
+
+[node name="FirePit" parent="." instance=ExtResource("7_campfire_pit")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 14, 0, -1.5)
+
+[node name="Water" type="MeshInstance3D" parent="." groups=["no_collision"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, 0)
+mesh = SubResource("CylinderMesh_water")
+surface_material_override/0 = SubResource("StandardMaterial3D_water")

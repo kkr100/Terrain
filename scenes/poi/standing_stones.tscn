@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/statue_column.glb" id="3_statue_column"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/statue_columnDamaged.glb" id="4_statue_columnDamaged"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/platform_stone.glb" id="5_platform_stone"]
+
+[node name="StandingStones" type="Node3D"]
+script = ExtResource("1_poi")
+id = "standing_stones"
+display_name = "Standing stones"
+description = "Who put these here, and why?"
+discover_radius = 28.0
+flat_radius = 16.0
+
+[node name="Stone1" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(6.89365, 0, 1.21554, 0, 7, 0, -1.21554, 0, 6.89365, 1.39, 0, 7.88)
+
+[node name="Stone2" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(4.01504, 0, 5.73406, 0, 7, 0, -5.73406, 0, 4.01504, 6.55, 0, 4.59)
+
+[node name="Stone3" parent="." instance=ExtResource("4_statue_columnDamaged")]
+transform = Transform3D(-1.21554, 0, 6.89365, 0, 7, 0, -6.89365, 0, -1.21554, 7.88, 0, -1.39)
+
+[node name="Stone4" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(-5.73406, 0, 4.01504, 0, 7, 0, -4.01504, 0, -5.73406, 4.59, 0, -6.55)
+
+[node name="Stone5" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(-6.89365, 0, -1.21554, 0, 7, 0, 1.21554, 0, -6.89365, -1.39, 0, -7.88)
+
+[node name="Stone6" parent="." instance=ExtResource("4_statue_columnDamaged")]
+transform = Transform3D(-4.01504, 0, -5.73406, 0, 7, 0, 5.73406, 0, -4.01504, -6.55, 0, -4.59)
+
+[node name="Stone7" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(1.21554, 0, -6.89365, 0, 7, 0, 6.89365, 0, 1.21554, -7.88, 0, 1.39)
+
+[node name="Stone8" parent="." instance=ExtResource("3_statue_column")]
+transform = Transform3D(5.73406, 0, -4.01504, 0, 7, 0, 4.01504, 0, 5.73406, -4.59, 0, 6.55)
+
+[node name="Altar" parent="." instance=ExtResource("5_platform_stone")]
+transform = Transform3D(5.79555, 0, 1.55291, 0, 6, 0, -1.55291, 0, 5.79555, 0, 0, 0)

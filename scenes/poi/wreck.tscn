@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="Script" path="res://scripts/tint_model.gd" id="2_tint"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/sedan.glb" id="3_sedan"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/debris-tire.glb" id="4_debris_tire"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/debris-door.glb" id="5_debris_door"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/debris-bumper.glb" id="6_debris_bumper"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stump_old.glb" id="7_stump_old"]
+
+[node name="Wreck" type="Node3D"]
+script = ExtResource("1_poi")
+id = "wreck"
+display_name = "Rusty wreck"
+description = "An old car that never made it over the hill."
+discover_radius = 26.0
+flat_radius = 14.0
+
+[node name="Car" parent="." instance=ExtResource("3_sedan")]
+transform = Transform3D(1.12595, 0.25855, 0.79081, -0.14412, 1.37118, -0.24311, -0.81942, 0.11411, 1.12939, 0, -0.25, 0)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="TireA" parent="." instance=ExtResource("4_debris_tire")]
+transform = Transform3D(1.55885, 0, 0.9, 0, 1.8, 0, -0.9, 0, 1.55885, 4, 0.55, 2.5)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="TireB" parent="." instance=ExtResource("4_debris_tire")]
+transform = Transform3D(0, 0.31257, 1.77265, 1.8, 0, 0, 0, 1.77265, -0.31257, -1.5, 0.15, 5)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="Door" parent="." instance=ExtResource("5_debris_door")]
+transform = Transform3D(0.07844, -0.89658, 1.55885, 1.79315, 0.15688, 0, -0.13586, 1.55291, 0.9, -3.8, 0.15, 1)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="Bumper" parent="." instance=ExtResource("6_debris_bumper")]
+transform = Transform3D(1.69145, 0, -0.61564, 0, 1.8, 0, 0.61564, 0, 1.69145, 2.5, 0, -3.8)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="Stump" parent="." instance=ExtResource("7_stump_old")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -5, 0, -4)

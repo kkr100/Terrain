@@ -14,6 +14,7 @@ Source: https://kenney.nl/assets/car-kit (CC0, see `License.txt` there).
 | `hatchback-sports.glb` | Rally Hatch |
 | `suv.glb` | Trail SUV |
 | `truck.glb` | Heavy Pickup |
+| `sedan.glb`, `tractor.glb`, `debris-*.glb` | The rusty wreck and the forgotten tractor (Explore mode) |
 | `Textures/colormap.png` | The models' shared colour texture |
 | `Textures/colormap_red.png`, `colormap_blue.png` | Our recoloured copies, for the rally car and the pickup |
 
@@ -28,6 +29,14 @@ Source: https://kenney.nl/assets/nature-kit (CC0, see `License.txt` there).
 | `stone_small*` | Rocks |
 | `stone_large*`, `stone_tall*` | Boulders |
 | `plant_bush*`, `grass_large` | Bushes and grass (decoration) |
+| `tent_*`, `campfire_*`, `log*`, `canoe`, `pot_large`, `sign`, `stump_old`, `lily_large`, `statue_*`, `platform_stone`, `mushroom_*` | Points of interest in Explore mode (`scenes/poi/`) |
+
+## Survival (`models/kenney_survival/`, from Kenney's Survival Kit 2.0)
+
+Source: https://kenney.nl/assets/survival-kit (CC0, see `License.txt` there).
+Used for the points of interest in Explore mode (`scenes/poi/`): the lookout
+tower and the woodcutter's shelter (`structure*`), crates, barrels, fences,
+signposts, the fishing stand and more. They share `Textures/colormap.png`.
 
 The ground has no textures: `shaders/terrain.gdshader` paints it with plain
 colours.

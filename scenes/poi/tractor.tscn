@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="Script" path="res://scripts/tint_model.gd" id="2_tint"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/tractor.glb" id="3_tractor"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/debris-tire.glb" id="4_debris_tire"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_survival/fence.glb" id="5_fence"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/grass_large.glb" id="6_grass_large"]
+
+[node name="Tractor" type="Node3D"]
+script = ExtResource("1_poi")
+id = "tractor"
+display_name = "Forgotten tractor"
+description = "Left in the field so long that the grass grew through it."
+discover_radius = 26.0
+flat_radius = 14.0
+
+[node name="Tractor" parent="." instance=ExtResource("3_tractor")]
+transform = Transform3D(1.72985, -0.11167, 0.99756, 0.20855, 1.9842, -0.13951, -0.98189, 0.22469, 1.72783, 0, -0.2, 0)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="Tire" parent="." instance=ExtResource("4_debris_tire")]
+transform = Transform3D(0, -2.25526, 0.82085, 2.4, 0, 0, 0, 0.82085, 2.25526, 4.5, 0.15, -3)
+script = ExtResource("2_tint")
+tint = Color(0.78, 0.52, 0.36, 1)
+
+[node name="FenceA" parent="." instance=ExtResource("5_fence")]
+transform = Transform3D(0, 0, 8, 1.66329, 7.82518, 0, -7.82518, 1.66329, 0, -5.5, 0, 0)
+
+[node name="FenceB" parent="." instance=ExtResource("5_fence")]
+transform = Transform3D(1.20307, 0.69459, 7.87846, -4, 6.9282, 0, -6.82295, -3.93923, 1.38919, -5.2, 0, 4.3)
+
+[node name="GrassA" parent="." groups=["no_collision"] instance=ExtResource("6_grass_large")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 1, 0, 1.5)
+
+[node name="GrassB" parent="." groups=["no_collision"] instance=ExtResource("6_grass_large")]
+transform = Transform3D(2, 0, 3.4641, 0, 4, 0, -3.4641, 0, 2, -1.5, 0, -1)
+
+[node name="GrassC" parent="." groups=["no_collision"] instance=ExtResource("6_grass_large")]
+transform = Transform3D(-1.5, 0, 2.59808, 0, 3, 0, -2.59808, 0, -1.5, 2.5, 0, -0.5)

@@ -37,6 +37,7 @@ func _ready() -> void:
 	# The panel covers the right side of the screen, so shift the camera's
 	# view to put the car in the middle of the part you can see.
 	_camera.h_offset = 1.8
+	$Title.text = "Choose your car: %s" % GameMode.selected().name
 	_index = CarChoice.selected_index()
 	_show_car()
 	_drive_button.grab_focus()
@@ -109,7 +110,8 @@ func _show_stats(stats: Dictionary) -> void:
 
 func _on_drive_pressed() -> void:
 	CarChoice.select(_index)
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	# Load the scene of the mode you picked in the main menu.
+	get_tree().change_scene_to_file(GameMode.selected().scene)
 
 
 func _on_back_pressed() -> void:

@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/point_of_interest.gd" id="1_poi"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/statue_head.glb" id="3_statue_head"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeA.glb" id="4_stone_largeA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeC.glb" id="5_stone_largeC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallC.glb" id="6_stone_smallC"]
+
+[node name="StoneHead" type="Node3D"]
+script = ExtResource("1_poi")
+id = "stone_head"
+display_name = "Giant stone head"
+description = "A huge face carved out of rock, staring at the horizon."
+discover_radius = 30.0
+flat_radius = 14.0
+
+[node name="Head" parent="." instance=ExtResource("3_statue_head")]
+transform = Transform3D(-8.45723, 0, -3.07818, 0, 9, 0, 3.07818, 0, -8.45723, 0, 0, 0)
+
+[node name="RockA" parent="." instance=ExtResource("4_stone_largeA")]
+transform = Transform3D(3.06418, 0, 2.57115, 0, 4, 0, -2.57115, 0, 3.06418, -7, 0, 3)
+
+[node name="RockB" parent="." instance=ExtResource("5_stone_largeC")]
+transform = Transform3D(-1.75, 0, 3.03109, 0, 3.5, 0, -3.03109, 0, -1.75, 6, 0, -3)
+
+[node name="RockC" parent="." instance=ExtResource("6_stone_smallC")]
+transform = Transform3D(2.95442, 0, 0.52094, 0, 3, 0, -0.52094, 0, 2.95442, 4, 0, 5)

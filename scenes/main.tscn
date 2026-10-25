@@ -1,8 +1,10 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/car.tscn" id="1_car"]
 [ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://scripts/terrain.gd" id="4_terrain"]
+[ext_resource type="Script" path="res://scripts/surface_type.gd" id="5_surface"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 
@@ -14,33 +16,26 @@ background_mode = 2
 sky = SubResource("Sky_main")
 tonemap_mode = 2
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-size = Vector2(200, 200)
+[sub_resource type="Resource" id="SurfaceType_dirt"]
+script = ExtResource("5_surface")
+display_name = "Dirt"
+grip = 1.0
+drag = 0.0
+color = Color(0.58, 0.45, 0.3, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.45, 0.38, 0.28, 1)
-uv1_scale = Vector3(100, 100, 1)
+[sub_resource type="Resource" id="SurfaceType_mud"]
+script = ExtResource("5_surface")
+display_name = "Mud"
+grip = 0.45
+drag = 0.35
+color = Color(0.3, 0.22, 0.15, 1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(200, 1, 200)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
-size = Vector3(6, 0.4, 10)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ramp"]
-size = Vector3(6, 0.4, 10)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_props"]
-albedo_color = Color(0.55, 0.5, 0.42, 1)
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_bump"]
-top_radius = 0.25
-bottom_radius = 0.25
-height = 8.0
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_bump"]
-radius = 0.25
-height = 8.0
+[sub_resource type="Resource" id="SurfaceType_rock"]
+script = ExtResource("5_surface")
+display_name = "Rock"
+grip = 1.4
+drag = 0.0
+color = Color(0.5, 0.5, 0.52, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_hud"]
 font_size = 20
@@ -56,57 +51,11 @@ environment = SubResource("Environment_main")
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 0)
 shadow_enabled = true
 
-[node name="Ground" type="StaticBody3D" parent="."]
-
-[node name="Mesh" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("PlaneMesh_ground")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("BoxShape3D_ground")
-
-[node name="TestProps" type="Node3D" parent="."]
-
-[node name="Ramp" type="StaticBody3D" parent="TestProps"]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.9, 30)
-
-[node name="Mesh" type="MeshInstance3D" parent="TestProps/Ramp"]
-mesh = SubResource("BoxMesh_ramp")
-surface_material_override/0 = SubResource("StandardMaterial3D_props")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Ramp"]
-shape = SubResource("BoxShape3D_ramp")
-
-[node name="Bump1" type="StaticBody3D" parent="TestProps"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 10)
-
-[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump1"]
-mesh = SubResource("CylinderMesh_bump")
-surface_material_override/0 = SubResource("StandardMaterial3D_props")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump1"]
-shape = SubResource("CylinderShape3D_bump")
-
-[node name="Bump2" type="StaticBody3D" parent="TestProps"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 14)
-
-[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump2"]
-mesh = SubResource("CylinderMesh_bump")
-surface_material_override/0 = SubResource("StandardMaterial3D_props")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump2"]
-shape = SubResource("CylinderShape3D_bump")
-
-[node name="Bump3" type="StaticBody3D" parent="TestProps"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 18)
-
-[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump3"]
-mesh = SubResource("CylinderMesh_bump")
-surface_material_override/0 = SubResource("StandardMaterial3D_props")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump3"]
-shape = SubResource("CylinderShape3D_bump")
+[node name="Terrain" type="StaticBody3D" parent="."]
+script = ExtResource("4_terrain")
+dirt = SubResource("SurfaceType_dirt")
+mud = SubResource("SurfaceType_mud")
+rock = SubResource("SurfaceType_rock")
 
 [node name="Car" parent="." instance=ExtResource("1_car")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

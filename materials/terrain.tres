@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" load_steps=8 format=3]
+
+[ext_resource type="Shader" path="res://shaders/terrain.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/textures/forrest_ground_01/forrest_ground_01_diff_1k.jpg" id="2_dirt"]
+[ext_resource type="Texture2D" path="res://assets/textures/forrest_ground_01/forrest_ground_01_nor_gl_1k.jpg" id="3_dirt_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/brown_mud_02/brown_mud_02_diff_1k.jpg" id="4_mud"]
+[ext_resource type="Texture2D" path="res://assets/textures/brown_mud_02/brown_mud_02_nor_gl_1k.jpg" id="5_mud_n"]
+[ext_resource type="Texture2D" path="res://assets/textures/rock_face_03/rock_face_03_diff_1k.jpg" id="6_rock"]
+[ext_resource type="Texture2D" path="res://assets/textures/rock_face_03/rock_face_03_nor_gl_1k.jpg" id="7_rock_n"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/dirt_albedo = ExtResource("2_dirt")
+shader_parameter/dirt_normal = ExtResource("3_dirt_n")
+shader_parameter/dirt_tile_size = 4.0
+shader_parameter/dirt_roughness = 0.95
+shader_parameter/mud_albedo = ExtResource("4_mud")
+shader_parameter/mud_normal = ExtResource("5_mud_n")
+shader_parameter/mud_tile_size = 3.0
+shader_parameter/mud_roughness = 0.65
+shader_parameter/rock_albedo = ExtResource("6_rock")
+shader_parameter/rock_normal = ExtResource("7_rock_n")
+shader_parameter/rock_tile_size = 6.0
+shader_parameter/rock_roughness = 0.85
+shader_parameter/normal_strength = 1.0
+shader_parameter/macro_variation = 0.35
+shader_parameter/blend_sharpness = 6.0

@@ -1,2 +1,7 @@
 # Normalize line endings so the project works the same on Windows, macOS and Linux
 * text=auto eol=lf
+
+# Images and 3D model data are binary: never touch their line endings
+*.jpg binary
+*.png binary
+*.bin binary

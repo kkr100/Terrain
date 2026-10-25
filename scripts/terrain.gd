@@ -12,13 +12,20 @@ extends StaticBody3D
 ## 3. Each point gets a surface: steep slopes are rock, some low patches are
 ##    mud, and everything else is dirt.
 ## 4. We turn the grid into a mesh (what you see) and a HeightMapShape3D
-##    (what the physics engine touches), and paint each surface its colour.
+##    (what the physics engine touches).
+## 5. Each vertex remembers how much dirt, mud and rock it has (in its
+##    colour: red = dirt, green = mud, blue = rock). The terrain shader
+##    (shaders/terrain.gdshader) reads that and paints real photo textures.
 ##
 ## "@tool" at the top means this script also runs inside the editor, so you
 ## see the hills there too. Change a setting, then press "Regenerate".
 
 ## Press this in the Inspector to rebuild the terrain with the new settings.
 @export_tool_button("Regenerate") var regenerate_button := regenerate
+
+## Sent after the terrain was rebuilt, so things standing on it (like the
+## trees and rocks in scripts/nature.gd) can move to the new ground.
+signal regenerated
 
 @export_group("Shape")
 ## Width and depth of the map in metres (also the number of grid cells).
@@ -43,6 +50,11 @@ extends StaticBody3D
 @export var mud: SurfaceType
 @export var rock: SurfaceType
 
+@export_group("Look")
+## The material that paints the ground. materials/terrain.tres uses real
+## textures. Leave it empty to paint each surface its plain colour instead.
+@export var ground_material: Material
+
 # The numbers we store per grid point to remember its surface.
 enum { DIRT, MUD, ROCK }
 
@@ -63,6 +75,7 @@ func regenerate() -> void:
 	_build_surfaces()
 	_build_mesh()
 	_build_collision()
+	regenerated.emit()
 
 
 ## Which surface is under a point in the world, for example under a wheel.
@@ -75,6 +88,12 @@ func get_surface_at(world_position: Vector3) -> SurfaceType:
 func get_height_at(world_position: Vector3) -> float:
 	var cell := _world_to_cell(world_position)
 	return _heights[cell.y * _points() + cell.x] + global_position.y
+
+
+## The direction straight out of the ground at a point in the world.
+func get_normal_at(world_position: Vector3) -> Vector3:
+	var cell := _world_to_cell(world_position)
+	return _normal_at(cell.x, cell.y)
 
 
 # --- Building the terrain ----------------------------------------------------
@@ -193,12 +212,14 @@ func _build_mesh() -> void:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var colors := PackedColorArray()
+	var weights := _surface_weights()
 	var indices := PackedInt32Array()
 	vertices.resize(n * n)
 	normals.resize(n * n)
 	colors.resize(n * n)
 
-	# A little extra noise on the colours so the ground doesn't look flat.
+	# A little extra noise on the plain colours so the ground doesn't look
+	# flat. (Only used when there is no ground_material.)
 	var tint := FastNoiseLite.new()
 	tint.seed = map_seed + 2
 	tint.frequency = 0.15
@@ -208,8 +229,11 @@ func _build_mesh() -> void:
 			var i := z * n + x
 			vertices[i] = Vector3(x - half, _heights[i], z - half)
 			normals[i] = _normal_at(x, z)
-			var shade := 1.0 + tint.get_noise_2d(x, z) * 0.12
-			colors[i] = _surface_for_id(_surfaces[i]).color * shade
+			if ground_material:
+				colors[i] = weights[i]
+			else:
+				var shade := 1.0 + tint.get_noise_2d(x, z) * 0.12
+				colors[i] = _surface_for_id(_surfaces[i]).color * shade
 
 	# Every grid square becomes two triangles. Godot wants the corners in
 	# clockwise order when you look at the front of a triangle.
@@ -230,16 +254,42 @@ func _build_mesh() -> void:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
-	# This material paints the mesh with the colours we stored per point.
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 1.0
+	var material := ground_material
+	if material == null:
+		# This material paints the mesh with the colours we stored per point.
+		var plain := StandardMaterial3D.new()
+		plain.vertex_color_use_as_albedo = true
+		plain.roughness = 1.0
+		material = plain
 	mesh.surface_set_material(0, material)
 
 	if _mesh_instance == null:
 		_mesh_instance = MeshInstance3D.new()
 		add_child(_mesh_instance)
 	_mesh_instance.mesh = mesh
+
+
+# How much dirt (red), mud (green) and rock (blue) each grid point has.
+# Each point is 100% one surface, but we average it with its neighbours so the
+# textures fade into each other over a metre or two instead of making hard,
+# blocky edges.
+func _surface_weights() -> PackedColorArray:
+	var n := _points()
+	var pure := [Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1)]
+	var weights := PackedColorArray()
+	weights.resize(n * n)
+	for z in n:
+		for x in n:
+			var sum := Color(0, 0, 0, 0)
+			var count := 0
+			for dz in range(-1, 2):
+				for dx in range(-1, 2):
+					var sx := clampi(x + dx, 0, size)
+					var sz := clampi(z + dz, 0, size)
+					sum += pure[_surfaces[sz * n + sx]]
+					count += 1
+			weights[z * n + x] = sum / count
+	return weights
 
 
 func _build_collision() -> void:

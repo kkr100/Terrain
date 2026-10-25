@@ -84,12 +84,11 @@ so you never need to commit it.
 | `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
 | `scripts/terrain.gd` | Builds the hills, paints the dirt, mud and rock, and tells the car which surface is under a wheel. |
 | `scripts/surface_type.gd` | Describes one kind of ground: its name, grip, drag and colour. |
-| `scripts/nature.gd` | Scatters trees and rocks over the map, away from the start and the route. |
-| `shaders/terrain.gdshader` | Paints the terrain with photo textures for dirt, mud and rock. |
-| `materials/terrain.tres` | The terrain's material: which textures the shader uses, and how big they are. |
-| `assets/textures/` | Ground and bark photo textures (CC0, from Poly Haven). |
-| `assets/models/` | Scanned rock models (CC0, from Poly Haven). |
-| `assets/CREDITS.md` | Where every texture and model comes from, and its license. |
+| `scripts/nature.gd` | Scatters trees, rocks and bushes over the map, away from the start and the route. |
+| `shaders/terrain.gdshader` | Paints the terrain in a flat-shaded, low-poly cartoon style. |
+| `materials/terrain.tres` | The terrain's material: the colours of dirt, mud and rock. |
+| `assets/models/` | Low-poly cars and nature models (CC0, from Kenney). |
+| `assets/CREDITS.md` | Where every model comes from, and its license. |
 | `.gitignore` | Tells git to skip Godot's generated cache files. |
 | `.gitattributes` | Keeps line endings consistent across Windows, macOS and Linux. |
 
@@ -290,71 +289,85 @@ wheel's `wheel_friction_slip` to its normal value times the surface's
 `grip`. Mud's `drag` also pushes back against the car's movement, harder the
 faster you go. The HUD shows the surface most of your wheels are on.
 
-### Textures: how the ground gets its look
+### Art style: how the ground gets its look
 
-The ground is painted with real photos of forest floor, mud and rock
-(`assets/textures/`). Two pieces work together:
+Everything in the game uses one cartoon "low-poly" style: the cars and the
+trees, rocks and bushes all come from [Kenney](https://kenney.nl), and the
+ground is painted to match. Low-poly art shows its triangles on purpose, and
+uses plain colours instead of photos.
+
+Two pieces work together to paint the ground:
 
 - **The terrain script stores a mix in each vertex.** Every point of the
   mesh gets a colour, but it isn't used as a colour: red means "this much
   dirt", green "this much mud" and blue "this much rock". These come from
   the same surfaces that decide the car's grip, so what you see is what you
-  drive on. Each point's mix is averaged with its neighbours so the edges
-  fade over a metre or two.
-- **The shader reads that mix and blends the textures.** A *shader* is a
-  small program that runs on the graphics card for every pixel. It is in
-  `shaders/terrain.gdshader`, and it is full of comments. The terrain has no
-  texture coordinates, so the shader uses the position in the world instead:
-  flat ground looks at the texture from above. Rock sits on steep slopes,
-  where that would stretch the texture, so rock uses **triplanar mapping**:
-  it looks at the texture from three sides and blends them by the slope.
-  Each texture also has a **normal map**, a second image that stores tiny
-  bumps, so stones and cracks catch the sunlight.
+  drive on.
+- **The shader turns that into flat colours.** A *shader* is a small program
+  that runs on the graphics card for every pixel. It is in
+  `shaders/terrain.gdshader`, and it is full of comments. It does three
+  things: **flat shading** (each triangle is lit as one flat piece, so you
+  see the facets), a **plain colour** for whichever surface has the biggest
+  share (so the edges between grass, mud and rock are crisp), and a slightly
+  different **shade for every triangle**, for that patchwork low-poly look.
+  Large patches of the grass are a drier, yellower green.
 
 To change how it looks, open `materials/terrain.tres` in the Inspector:
 
 | Setting | What it does |
 | --- | --- |
-| `*_albedo` / `*_normal` | The colour photo and the bump map for each surface. Drag in other textures to try them. |
-| `*_tile_size` | How many metres one copy of a texture covers. Bigger = larger stones and cracks. |
-| `*_roughness` | 1 is matte, 0 is like a mirror. Mud is a bit smoother because it's wet. |
-| `macro_variation` | Big, soft light and dark patches that hide the texture repeating. |
-| `blend_sharpness` | How crisp the border between two surfaces is. |
+| `dirt_color`, `dry_color`, `mud_color`, `rock_color` | The colour of each surface. Dirt is the grassy ground; dry is its yellower patches. |
+| `facet_variation` | How much the triangles' shades differ. 0 makes every surface one flat colour. |
+| `dry_patch_size` | How big the dry patches are, in metres. |
+| `mud_roughness` | 1 is matte, 0 is like a mirror. Mud is a bit shinier because it's wet. |
+
+The sky, sun and fog are on the `WorldEnvironment` and `Sun` nodes in
+`main.tscn`: a clear blue sky, a warm sun, light blue haze in the distance,
+and a little extra colour (Adjustments > Saturation) for the cartoon look.
 
 If you empty the Terrain's `ground_material`, the terrain goes back to the
-old plain colours (each surface's `color`).
+old plain colours (each surface's `color`), with smooth shading.
 
 ### Trees and rocks
 
-The `Nature` node (`scripts/nature.gd`) scatters trees and rocks when the
-game starts. It picks random spots with a `RandomNumberGenerator` that has a
-fixed seed, so you get the same forest every time. A spot is skipped if it is
-in the start area, close to the straight line between the checkpoints, too
-close to something already placed, or on the wrong ground: trees grow on dirt
-where a noise says "forest", and rocks prefer rocky slopes and stay out of
-mud.
+The `Nature` node (`scripts/nature.gd`) scatters trees, rocks and bushes
+when the game starts. It picks random spots with a `RandomNumberGenerator`
+that has a fixed seed, so you get the same forest every time. A spot is
+skipped if it is in the start area, close to the straight line between the
+checkpoints, too close to something already placed, or on the wrong ground:
+trees grow on dirt where a noise says "forest", and rocks prefer rocky
+slopes and stay out of mud.
 
-- **Trees** are simple pines made in code: a trunk with a real bark texture
-  and five cones of needles. All 450 are drawn by one
-  `MultiMeshInstance3D`, which sends the same mesh to the graphics card once
-  and draws it hundreds of times. That is much faster than 450 separate
-  nodes. Each trunk gets a `CylinderShape3D`, so you can crash into it.
-- **Rocks** are 3D scans from Poly Haven (`.gltf` files). Godot imports them
-  and automatically makes simpler versions of each mesh (LODs, for *level of
-  detail*) that it uses when a rock is far away. Each rock gets a
-  `ConvexPolygonShape3D`, a "shrink-wrapped" version of its shape that is
-  cheap for the physics engine.
+All the models come from Kenney's [Nature Kit](https://kenney.nl/assets/nature-kit)
+(`assets/models/kenney_nature/`), the same artist as the cars. Each model is
+only about 1 m big, so the script scales it up to a size in metres. Kenney
+coloured the kit teal and orange; the script repaints it to fit our green
+hills with the `palette` setting (every material in the models has a name,
+like `leafsGreen` or `stone`, and gets the colour listed for that name).
+
+- **Trees** are a mix of 12 models: tall pines, round pines and leafy
+  trees. Each model is drawn by its own `MultiMeshInstance3D`, which sends
+  the mesh to the graphics card once and draws it hundreds of times. That
+  is much faster than 450 separate nodes. Each tree also gets a slightly
+  different shade, and each trunk gets a `CylinderShape3D`, so you can crash
+  into it.
+- **Rocks and boulders** each get their own node with a
+  `ConvexPolygonShape3D`, a "shrink-wrapped" version of the rock's shape that
+  is cheap for the physics engine.
+- **Bushes and grass** are only decoration: no collision, you drive through
+  them.
 
 Settings on the `Nature` node:
 
 | Setting | What it does |
 | --- | --- |
-| `tree_count`, `rock_count`, `boulder_count` | How many of each to place (fewer may fit). |
+| `tree_count`, `rock_count`, `boulder_count`, `bush_count` | How many of each to place (fewer may fit). |
 | `nature_seed` | Any number gives a different layout. |
 | `start_clearance` | Nothing within this many metres of the start. |
 | `route_clearance` | Nothing within this many metres of the line between checkpoints. |
-| `needle_color` | The colour of the pine needles. |
-| `rock_scenes`, `boulder_scenes` | Which rock models to use. Drag in other `.gltf` rocks. |
+| `tree_scenes`, `rock_scenes`, `boulder_scenes`, `bush_scenes` | Which models to use. Drag in other `.glb` files from the Nature Kit. |
+| `tree_height`, `rock_size`, `boulder_size`, `bush_size` | Smallest and biggest size, in metres. |
+| `palette` | The colour for each material name in the models. |
 
 Click **Regenerate** on the Nature node after changing a setting. If you move
 checkpoints, regenerate too, so the new route is kept clear (it also happens
@@ -367,9 +380,13 @@ by itself every time the game starts).
 - Turn mud into deep swamp: raise Mud's `drag` to 1.0.
 - Make mountains: raise `hill_height` to 60 and lower `hill_frequency`.
 - Grow a thick forest: set `tree_count` to 1000 and `route_clearance` to 6.
-- Download another ground texture from [Poly Haven](https://polyhaven.com/textures)
-  (the 1k JPG "Diffuse" and "Normal (GL)" files), put it in `assets/textures/`
-  and drag it into `materials/terrain.tres`.
+- Make it autumn: in `palette`, set `leafsGreen` to orange and `leafsDark`
+  to a dark red, and set `dirt_color` in `materials/terrain.tres` to a
+  yellowish brown.
+- Add more of the Nature Kit: download it from
+  [kenney.nl](https://kenney.nl/assets/nature-kit), copy a few `.glb` files
+  from `Models/GLTF format` into `assets/models/kenney_nature/` and drag
+  them into one of the `*_scenes` lists.
 
 ## How the game works
 

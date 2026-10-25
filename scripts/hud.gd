@@ -12,4 +12,5 @@ func _process(_delta: float) -> void:
 		return
 	# linear_velocity is in metres per second. Multiply by 3.6 for km/h.
 	var kmh := absf(car.get_forward_speed()) * 3.6
-	text = "%d km/h\n%s" % [roundi(kmh), CONTROLS]
+	var ground: String = car.surface_name if car.surface_name != "" else "In the air"
+	text = "%d km/h   %s\n%s" % [roundi(kmh), ground, CONTROLS]

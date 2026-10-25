@@ -24,12 +24,22 @@ extends VehicleBody3D
 ## If the car falls below this height it is put back on the map.
 @export var fall_limit_y := -20.0
 
+## The name of the ground under the car ("Dirt", "Mud", ...), for the HUD.
+var surface_name := ""
+
 var _spawn_transform: Transform3D
+var _wheels: Array[VehicleWheel3D] = []
+# Each wheel's grip as set in car.tscn, before the ground changes it.
+var _base_friction: Array[float] = []
 
 
 func _ready() -> void:
 	# Remember where we started, so we can respawn there if we fall off.
 	_spawn_transform = global_transform
+	for child in get_children():
+		if child is VehicleWheel3D:
+			_wheels.append(child)
+			_base_friction.append(child.wheel_friction_slip)
 
 
 func _physics_process(delta: float) -> void:
@@ -67,11 +77,48 @@ func _physics_process(delta: float) -> void:
 	# move_toward turns the wheels smoothly instead of snapping them.
 	steering = move_toward(steering, target_steer, steer_speed * delta)
 
+	_apply_ground()
+
 	# --- Resetting ---------------------------------------------------------
 	if Input.is_action_just_pressed("reset_car"):
 		flip_upright()
 	if global_position.y < fall_limit_y:
 		respawn()
+
+
+## Changes each wheel's grip to match the ground under it, and slows the car
+## down in mud.
+func _apply_ground() -> void:
+	var total_drag := 0.0
+	var counts := {}
+	for i in _wheels.size():
+		var wheel := _wheels[i]
+		var surface: SurfaceType = null
+		# get_contact_body() is whatever the wheel is touching. If that thing
+		# is our terrain, ask it which surface is under the wheel.
+		if wheel.is_in_contact():
+			var ground := wheel.get_contact_body()
+			if ground is Terrain:
+				surface = ground.get_surface_at(wheel.get_contact_point())
+		if surface == null:
+			wheel.wheel_friction_slip = _base_friction[i]
+			continue
+		wheel.wheel_friction_slip = _base_friction[i] * surface.grip
+		total_drag += surface.drag / _wheels.size()
+		counts[surface.display_name] = counts.get(surface.display_name, 0) + 1
+
+	# Mud pulls back against the way the car moves. The faster you go, the
+	# harder it pulls, a bit like wading through water.
+	if total_drag > 0.0:
+		apply_central_force(-linear_velocity * total_drag * mass)
+
+	# Show the surface that most wheels are on.
+	surface_name = ""
+	var best := 0
+	for surface_key in counts:
+		if counts[surface_key] > best:
+			best = counts[surface_key]
+			surface_name = surface_key
 
 
 ## Speed along the direction the car points, in metres per second.

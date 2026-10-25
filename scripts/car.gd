@@ -1,5 +1,8 @@
+class_name Car
 extends VehicleBody3D
-## A simple offroad car.
+## An offroad car. All three cars (scenes/cars/) use this same script: what
+## makes them different is the numbers in the Inspector, the mass, and the
+## wheel settings in each car's scene.
 ##
 ## VehicleBody3D does the hard physics work for us: every VehicleWheel3D child
 ## shoots a ray down at the ground and acts like a spring (the suspension).
@@ -23,12 +26,41 @@ extends VehicleBody3D
 @export var steer_speed := 2.5
 ## If the car falls below this height it is put back on the map.
 @export var fall_limit_y := -20.0
+## How much mud slows this car down. 1 = normal, 0.5 = half as much
+## (big tyres, heavy truck), 1.5 = more (small, light car).
+@export var mud_drag_scale := 1.0
+
+@export_group("Engine")
+## Engine speed when idling, in revolutions per minute (RPM).
+@export var idle_rpm := 850.0
+## The highest engine speed. The engine changes up a gear when it gets here.
+@export var redline_rpm := 6000.0
+## How many forward gears the gearbox has.
+@export var gear_count := 5
+
+@export_group("Looks")
+## The 3D model (a .glb from the Kenney car kit). Its wheels are called
+## "wheel-front-left" and so on. When the game starts we move each one onto
+## the VehicleWheel3D with the matching name (WheelFrontLeft), so the tyres
+## spin, steer and bounce with the physics wheels.
+@export var model: Node3D
+## Makes the model's tyres bigger (1.2 = 20% bigger), for chunky offroad
+## tyres. Remember to make each VehicleWheel3D's "Wheel Radius" match!
+@export var tire_scale := 1.0
+## Optional paint job: a recoloured copy of the model's colour texture.
+@export var paint: Texture2D
 
 ## The name of the ground under the car ("Dirt", "Mud", ...), for the HUD.
 var surface_name := ""
 ## When false the car ignores the keys and holds its brakes. The race turns
 ## this off during the countdown and after the finish.
 var controls_enabled := true
+## How hard you press the pedal right now: 1 = full gas, -1 = full
+## brake/reverse. The engine sound listens to this.
+var throttle := 0.0
+## Engine speed right now, in RPM, and the gear it's in (1 = first gear).
+var rpm := 0.0
+var gear := 1
 
 var _spawn_transform: Transform3D
 var _wheels: Array[VehicleWheel3D] = []
@@ -39,16 +71,20 @@ var _base_friction: Array[float] = []
 func _ready() -> void:
 	# Remember where we started, so we can respawn there if we fall off.
 	_spawn_transform = global_transform
+	rpm = idle_rpm
 	for child in get_children():
 		if child is VehicleWheel3D:
 			_wheels.append(child)
 			_base_friction.append(child.wheel_friction_slip)
+	if paint and model:
+		_repaint(model)
+	_attach_wheel_models()
 
 
 func _physics_process(delta: float) -> void:
 	# Input.get_axis returns -1, 0 or 1 (or values in between for a gamepad).
 	# The action names are set up in Project > Project Settings > Input Map.
-	var throttle := Input.get_axis("brake", "accelerate")
+	throttle = Input.get_axis("brake", "accelerate")
 	var steer_input := Input.get_axis("steer_right", "steer_left")
 	if not controls_enabled:
 		throttle = 0.0
@@ -84,6 +120,7 @@ func _physics_process(delta: float) -> void:
 	steering = move_toward(steering, target_steer, steer_speed * delta)
 
 	_apply_ground()
+	_update_engine(delta)
 
 	# --- Resetting ---------------------------------------------------------
 	if Input.is_action_just_pressed("reset_car"):
@@ -110,7 +147,7 @@ func _apply_ground() -> void:
 			wheel.wheel_friction_slip = _base_friction[i]
 			continue
 		wheel.wheel_friction_slip = _base_friction[i] * surface.grip
-		total_drag += surface.drag / _wheels.size()
+		total_drag += surface.drag * mud_drag_scale / _wheels.size()
 		counts[surface.display_name] = counts.get(surface.display_name, 0) + 1
 
 	# Mud pulls back against the way the car moves. The faster you go, the
@@ -125,6 +162,73 @@ func _apply_ground() -> void:
 		if counts[surface_key] > best:
 			best = counts[surface_key]
 			surface_name = surface_key
+
+
+## Works out the engine speed (RPM) and gear from how fast the car goes, like
+## an automatic gearbox. This doesn't change how the car drives, it's just
+## for the engine sound and the HUD.
+func _update_engine(delta: float) -> void:
+	var top_speed := max_speed_kmh / 3.6
+	# 0 = standing still, 1 = top speed. Each gear covers an equal slice.
+	var speed_fraction := clampf(absf(get_forward_speed()) / top_speed, 0.0, 1.0)
+	var gear_position := speed_fraction * gear_count
+	gear = mini(floori(gear_position), gear_count - 1) + 1
+	var through_gear := gear_position - (gear - 1)  # 0 at the start of a gear, 1 at the end
+	var target_rpm: float
+	if gear == 1:
+		target_rpm = lerpf(idle_rpm, redline_rpm, through_gear)
+	else:
+		# After changing up, the engine drops to about 60% of the redline.
+		target_rpm = lerpf(redline_rpm * 0.6, redline_rpm, through_gear)
+
+	# Revving while (almost) standing still, or with the wheels in the air.
+	var on_ground := false
+	for wheel in _wheels:
+		on_ground = on_ground or wheel.is_in_contact()
+	var free_rev := idle_rpm + (redline_rpm - idle_rpm) * absf(throttle)
+	if not on_ground:
+		target_rpm = free_rev
+	elif speed_fraction < 0.1:
+		target_rpm = maxf(target_rpm, idle_rpm + (redline_rpm - idle_rpm) * absf(throttle) * 0.4)
+
+	# Move smoothly towards the target, like a real engine speeding up.
+	rpm = lerpf(rpm, target_rpm, 1.0 - exp(-6.0 * delta))
+
+
+## Moves the model's wheel meshes onto our VehicleWheel3D nodes. Godot moves
+## and turns each VehicleWheel3D as the car drives, so anything that's a child
+## of one spins and steers along with it.
+func _attach_wheel_models() -> void:
+	if model == null:
+		return
+	for wheel in _wheels:
+		# "WheelFrontLeft" -> "wheel_front_left" -> "wheel-front-left"
+		var mesh_name := String(wheel.name).to_snake_case().replace("_", "-")
+		var mesh := model.find_child(mesh_name) as Node3D
+		if mesh == null:
+			continue
+		# reparent() keeps the mesh where it is in the world by default.
+		mesh.reparent(wheel)
+		# Line the tyre's axle up with the wheel's centre. We keep the
+		# sideways offset, so the tyre stays under the wheel arch.
+		mesh.position.y = 0.0
+		mesh.position.z = 0.0
+		mesh.scale *= tire_scale
+
+
+## Swaps the colour texture on every mesh of the model for the "paint" one.
+## The models share one small texture of colour swatches, so a recoloured copy
+## of that texture gives the car a new colour without touching the model.
+func _repaint(node: Node) -> void:
+	if node is MeshInstance3D:
+		for i in node.mesh.get_surface_count():
+			var material := node.mesh.surface_get_material(i) as BaseMaterial3D
+			if material:
+				material = material.duplicate()
+				material.albedo_texture = paint
+				node.set_surface_override_material(i, material)
+	for child in node.get_children():
+		_repaint(child)
 
 
 ## Speed along the direction the car points, in metres per second.

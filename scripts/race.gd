@@ -12,7 +12,8 @@ extends Node
 ## Sent when the car reaches the finish.
 signal finished(time: float, best_time: float, is_new_best: bool)
 
-@export var car: VehicleBody3D
+## The car. CarSpawner fills this in when the race starts.
+@export var car: Car
 @export var terrain: Terrain
 ## The node whose children are the checkpoints.
 @export var checkpoints_root: Node3D
@@ -82,11 +83,13 @@ func _finish() -> void:
 	is_finished = true
 	car.controls_enabled = false
 	_update_checkpoints()
-	var best := BestTime.read()
+	# Each car has its own best time, since some cars are much faster.
+	var car_id: String = CarChoice.selected().id
+	var best := BestTime.read(car_id)
 	var is_new_best := best < 0.0 or elapsed < best
 	if is_new_best:
 		best = elapsed
-		BestTime.write(best)
+		BestTime.write(car_id, best)
 	finished.emit(elapsed, best, is_new_best)
 
 

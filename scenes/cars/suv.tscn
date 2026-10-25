@@ -1,0 +1,98 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/car.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_cars/suv.glb" id="2_model"]
+[ext_resource type="Script" path="res://scripts/engine_sound.gd" id="3_sound"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(1.9, 1.0, 3.5)
+
+[node name="Car" type="VehicleBody3D" node_paths=PackedStringArray("model")]
+mass = 1400.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.05, 0)
+script = ExtResource("1_script")
+max_engine_force = 2000.0
+max_brake = 45.0
+max_speed_kmh = 120.0
+max_reverse_kmh = 30.0
+max_steer_angle = 0.5
+steer_speed = 2.5
+mud_drag_scale = 1.0
+idle_rpm = 800.0
+redline_rpm = 6000.0
+gear_count = 5
+model = NodePath("Model")
+tire_scale = 1.15
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 1.0, 0.1)
+shape = SubResource("BoxShape3D_body")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0, 0)
+
+[node name="WheelFrontLeft" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.62, 1.064)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.15
+wheel_radius = 0.483
+wheel_rest_length = 0.35
+wheel_friction_slip = 3.8
+suspension_travel = 0.3
+suspension_stiffness = 35.0
+suspension_max_force = 25000.0
+damping_compression = 1.8
+damping_relaxation = 2.8
+
+[node name="WheelFrontRight" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.62, 1.064)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.15
+wheel_radius = 0.483
+wheel_rest_length = 0.35
+wheel_friction_slip = 3.8
+suspension_travel = 0.3
+suspension_stiffness = 35.0
+suspension_max_force = 25000.0
+damping_compression = 1.8
+damping_relaxation = 2.8
+
+[node name="WheelRearLeft" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.62, -0.784)
+use_as_traction = true
+use_as_steering = false
+wheel_roll_influence = 0.15
+wheel_radius = 0.483
+wheel_rest_length = 0.35
+wheel_friction_slip = 3.8
+suspension_travel = 0.3
+suspension_stiffness = 35.0
+suspension_max_force = 25000.0
+damping_compression = 1.8
+damping_relaxation = 2.8
+
+[node name="WheelRearRight" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.62, -0.784)
+use_as_traction = true
+use_as_steering = false
+wheel_roll_influence = 0.15
+wheel_radius = 0.483
+wheel_rest_length = 0.35
+wheel_friction_slip = 3.8
+suspension_travel = 0.3
+suspension_stiffness = 35.0
+suspension_max_force = 25000.0
+damping_compression = 1.8
+damping_relaxation = 2.8
+
+[node name="EngineSound" type="AudioStreamPlayer" parent="."]
+volume_db = -3.0
+script = ExtResource("3_sound")
+cylinders = 6
+sharpness = 18.0
+rumble = 0.12
+hiss = 0.15
+brightness_hz = 2200.0

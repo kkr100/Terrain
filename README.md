@@ -4,9 +4,10 @@ A learning prototype of an offroad driving game, inspired by games like
 "Over the Hill". It's built with [Godot 4](https://godotengine.org/), a free
 and open source game engine.
 
-You drive a small 4x4 across a hilly offroad map with dirt, mud and rock,
-each with its own grip. Your goal: drive through 8 checkpoints and the
-finish line, in order, as fast as you can. The game remembers your best time.
+Pick one of three cars, a light rally hatch, a trail SUV or a heavy pickup,
+and drive it across a hilly offroad map with dirt, mud and rock, each with
+its own grip. Your goal: drive through 8 checkpoints and the finish line, in
+order, as fast as you can. The game remembers your best time with each car.
 
 ## How to open and run it
 
@@ -16,7 +17,8 @@ finish line, in order, as fast as you can. The game remembers your best time.
 3. Start Godot. In the Project Manager, click **Import**, pick the
    `project.godot` file in this folder, then click **Import & Edit**.
 4. Press **F5** (or the ▶ play button in the top right) to run the game.
-   The main menu opens. Click **Start** (or press Enter) to begin a race.
+   The main menu opens. Click **Start** (or press Enter), pick a car, then
+   click **Drive!** to begin a race.
    Close the window or press **F8** to stop it.
 
 Want to skip the menu while you're working on the map or the car? Open
@@ -66,13 +68,18 @@ so you never need to commit it.
 | `scenes/main.tscn` | The race: the map, the car, the checkpoints, the camera and the HUD. |
 | `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). `main.tscn` uses it nine times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
-| `scenes/car.tscn` | The car on its own: body, wheels and suspension. |
-| `scripts/car.gd` | Reads the keyboard and tells the car to drive, brake and steer. |
+| `scenes/car_select.tscn` | The car-select screen, with a 3D preview of each car. |
+| `scenes/cars/rally.tscn`, `suv.tscn`, `pickup.tscn` | The three cars: model, wheels, suspension and engine sound. |
+| `scripts/car.gd` | Used by all three cars. Reads the keyboard and tells the car to drive, brake and steer. |
+| `scripts/engine_sound.gd` | Makes each car's engine noise in code, following the RPM. |
+| `scripts/car_choice.gd` | The list of cars (names, descriptions, stat bars) and which one you picked. |
+| `scripts/car_spawner.gd` | Puts the car you picked into the race. |
+| `scripts/car_select.gd` | Makes the car-select screen work. |
 | `scripts/chase_camera.gd` | Makes the camera follow the car from behind. |
 | `scripts/hud.gd` | Shows the speed, the race info, the countdown and the finish screen. |
 | `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
 | `scripts/checkpoint.gd` | Notices when the car drives through a checkpoint, and changes its colour. |
-| `scripts/best_time.gd` | Saves and loads your best time. |
+| `scripts/best_time.gd` | Saves and loads your best time with each car. |
 | `scripts/main_menu.gd` | Makes the Start and Quit buttons work. |
 | `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
 | `scripts/terrain.gd` | Builds the hills, paints the dirt, mud and rock, and tells the car which surface is under a wheel. |
@@ -101,7 +108,7 @@ Main (Node3D)              the root; every other node hangs under it
 ├── WorldEnvironment       the sky and overall lighting look
 ├── Sun (DirectionalLight3D)  sunlight coming from one direction, with shadows
 ├── Terrain (StaticBody3D)  the hilly ground; scripts/terrain.gd builds it
-├── Car                    the car, an instance of scenes/car.tscn
+├── CarSpawner (Marker3D)   puts the car you picked here when the race starts
 ├── ChaseCamera (Camera3D) what the player sees; it follows the car
 ├── Checkpoints (Node3D)   holds Checkpoint1 … Checkpoint8 and Finish
 ├── Race (Node)            the rules; scripts/race.gd
@@ -123,17 +130,60 @@ Some useful things to know:
 - **Moving around in the editor:** hold the right mouse button and use
   W A S D to fly around the 3D view.
 
-## How the car works
+## How the cars work
 
-Open `scenes/car.tscn` to see the car on its own:
+There are three cars in `scenes/cars/`. Open `scenes/cars/suv.tscn` to see
+one on its own:
 
 ```
 Car (VehicleBody3D)        the physics body; scripts/car.gd is attached here
 ├── CollisionShape3D       a box, the shape that bumps into things
-├── Body, Cabin, Headlights  boxes you see (just looks, no physics)
-└── WheelFrontLeft … WheelRearRight (VehicleWheel3D)
-    └── Tire               a cylinder you see spinning
+├── Model                  the 3D model (a .glb file), just looks, no physics
+├── WheelFrontLeft … WheelRearRight (VehicleWheel3D)
+└── EngineSound (AudioStreamPlayer)  the engine noise; scripts/engine_sound.gd
 ```
+
+All three use the same script. What makes them feel different is only
+numbers: the mass, the engine power, the top speed, how far the wheels steer,
+and the wheel settings below. Select the root `Car` node of each one and
+compare them in the Inspector.
+
+| | Rally Hatch | Trail SUV | Heavy Pickup |
+| --- | --- | --- | --- |
+| Mass | 850 kg | 1400 kg | 2200 kg |
+| Top speed | 145 km/h | 120 km/h | 105 km/h |
+| Suspension | short and stiff | medium | long and soft |
+| Tyres | small, very grippy | chunky | huge |
+| In mud | slows down a lot (`mud_drag_scale` 1.6) | normal (1.0) | barely slows (0.45) |
+| Engine | 4-cylinder, revs to 7500 | 6-cylinder, revs to 6000 | V8, revs to 4800 |
+
+The models come from Kenney's free [Car Kit](https://kenney.nl/assets/car-kit)
+(see `assets/CREDITS.md`). Each model has its wheels as separate parts called
+`wheel-front-left` and so on. When the game starts, `car.gd` moves each one onto
+the `VehicleWheel3D` with the matching name, so the tyres spin, steer and
+bounce. The red rally car and blue pickup are recoloured with a copy of the
+model's colour texture (the `paint` setting).
+
+A trick worth knowing: each car's **center of mass** (on the root node, under
+**Mass Distribution**) is set very low, near the ground. Real cars are
+top-heavy and roll over in tight turns, and with Godot's simple car physics
+they roll over far too easily. Moving the center of mass down makes them
+stable. Try raising it to 0.5 and taking a sharp turn at speed!
+
+### The engine sound
+
+There are no sound files: `engine_sound.gd` makes the sound while the game
+runs, with an `AudioStreamGenerator`. A sound is a long list of numbers
+between -1 and 1 that the speaker follows, 22050 of them each second here.
+Each time a cylinder fires the script plays a short "bang" that fades out.
+Faster RPM means the bangs come closer together, so the note gets higher.
+That's why a 4-cylinder buzzes and a V8 rumbles. `car.gd` works out the RPM
+and gear from the speed, like an automatic gearbox, and the HUD shows both.
+
+Select a car's `EngineSound` node and try `cylinders`, `sharpness`, `rumble`
+(an uneven, lumpy V8 sound) and `brightness_hz` (lower sounds more muffled).
+
+### The physics
 
 **VehicleBody3D** is a physics body (a `RigidBody3D`) that Godot already knows
 how to treat as a car. It has three settings a script changes every frame:
@@ -149,7 +199,7 @@ try these in the Inspector:
 
 | Setting | What it does |
 | --- | --- |
-| `wheel_radius` | Size of the wheel. Keep it the same as the Tire mesh. |
+| `wheel_radius` | Size of the wheel. Keep it the same as the tyre you see. |
 | `wheel_rest_length` | How long the spring is when nothing presses on it. |
 | `suspension_travel` | How far the spring can squash. |
 | `suspension_stiffness` | Spring strength. Low = soft and bouncy, high = stiff. |
@@ -158,13 +208,18 @@ try these in the Inspector:
 | `use_as_traction` / `use_as_steering` | Whether the engine drives this wheel / whether it steers. All four drive, only the front two steer. |
 
 **Forward is +Z.** A `VehicleBody3D` drives towards its blue Z arrow. That's
-why the headlights are on the +Z end of the car.
+why the front of each model points along +Z.
 
 **The script** `scripts/car.gd` runs `_physics_process` 60 times a second. It
 reads the keys with `Input.get_axis(...)` and sets `engine_force`, `brake` and
 `steering`. The numbers at the top marked `@export` show up in the Inspector
 when you select the car, so you can tune the top speed or engine power without
 editing code.
+
+**Which car is in the race?** `main.tscn` doesn't contain a car. Instead the
+`CarSpawner` node asks `CarChoice` which car you picked, loads that scene,
+and puts it at its own position. Then it tells the camera, the race and the
+HUD which car to follow.
 
 **The camera** in `scripts/chase_camera.gd` works out a spot behind and above
 the car, then each frame moves only part of the way there. That lag is what
@@ -173,11 +228,14 @@ makes it feel smooth. Try changing `follow_speed` and `distance` on the
 
 ### Things to try
 
-- Make the car slide more: lower `wheel_friction_slip` on all four wheels.
-- Make it a rear-wheel-drive car: untick `use_as_traction` on the front wheels.
-- Make it a monster truck: raise `wheel_radius` on the wheels and the Tire
-  meshes, and raise `wheel_rest_length`.
+- Make a car slide more: lower `wheel_friction_slip` on all four wheels.
+- Make it rear-wheel drive: untick `use_as_traction` on the front wheels.
+- Make a monster truck: raise `tire_scale` on the Car node and `wheel_radius`
+  on the wheels by the same amount, and raise `wheel_rest_length`.
 - Raise `max_engine_force` on the Car node and launch off a hilltop.
+- Add a fourth car: duplicate `scenes/cars/suv.tscn`, change its numbers (or
+  swap the Model for another car from the Kenney kit), and add it to the
+  `CARS` list in `scripts/car_choice.gd`.
 
 ## How the terrain works
 
@@ -317,11 +375,16 @@ by itself every time the game starts).
 
 ### Scenes and menus
 
-The game is three scenes that take turns on screen:
+The game is four scenes that take turns on screen:
 
 ```
-main_menu.tscn  --Start-->  main.tscn  --Main menu (pause or finish)-->  main_menu.tscn
+main_menu.tscn  --Start-->  car_select.tscn  --Drive!-->  main.tscn  --Main menu-->  main_menu.tscn
 ```
+
+The car-select screen shows the real car scene inside a **SubViewport**: a
+small, separate 3D world (with its own light, floor and camera) drawn inside
+the 2D menu. The car's controls are turned off so it just sits there idling,
+and you can hear its engine.
 
 **Project > Project Settings > Application > Run > Main Scene** says which
 one opens first (the menu). A script switches to another scene with
@@ -361,7 +424,8 @@ next, and tells each one how to look (next, waiting or done).
 
 The timer is just a number: every frame, `race.gd` adds `delta` (the
 seconds since the last frame) to `elapsed`. When you finish, it compares
-your time with the best one and saves it to `user://save.cfg`. `user://` is
+your time with the best one for that car and saves it to `user://save.cfg`
+(the car you picked is saved there too). `user://` is
 a folder Godot gives every game for save files, so it works the same on
 every computer.
 
@@ -424,8 +488,9 @@ Macs. That's why it's turned on in
 3. ✅ Offroad terrain
 4. ✅ Game goals, a menu and a desktop build
 
-Since then: real ground textures, trees and rocks.
+Since then: real ground textures, trees and rocks, and three cars to pick
+from, each with its own engine sound.
 
-Ideas for what's next: grass and small plants on the ground, sound for the engine and the wheels, a mini-map or
+Ideas for what's next: grass and small plants on the ground, sound for the wheels and crashes, a mini-map or
 an arrow pointing to the next checkpoint, more maps with different seeds,
 or a gamepad (add buttons to the actions in the Input Map).

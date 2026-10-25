@@ -1,7 +1,7 @@
 # Asset credits
 
-All textures and models in this folder are from [Poly Haven](https://polyhaven.com)
-and are licensed [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/):
+The textures and rocks in this folder are from [Poly Haven](https://polyhaven.com),
+the cars from [Kenney](https://kenney.nl). Everything is licensed [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/):
 public domain, free to use in any project, no attribution required. We list
 them anyway so you know where they came from.
 
@@ -21,5 +21,17 @@ them anyway so you know where they came from.
 | `rock_07` | Rocks | https://polyhaven.com/a/rock_07 |
 | `rock_09` | Rocks | https://polyhaven.com/a/rock_09 |
 | `namaqualand_boulder_05` | Big boulders | https://polyhaven.com/a/namaqualand_boulder_05 |
+
+## Cars (`models/kenney_cars/`, from Kenney's Car Kit 3.1)
+
+Source: https://kenney.nl/assets/car-kit (CC0, see `License.txt` there).
+
+| File | Used for |
+| --- | --- |
+| `hatchback-sports.glb` | Rally Hatch |
+| `suv.glb` | Trail SUV |
+| `truck.glb` | Heavy Pickup |
+| `Textures/colormap.png` | The models' shared colour texture |
+| `Textures/colormap_red.png`, `colormap_blue.png` | Our recoloured copies, for the rally car and the pickup |
 
 The pine trees are not downloaded: `scripts/nature.gd` builds them in code.

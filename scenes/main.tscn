@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=53 format=3]
 
 [ext_resource type="Script" path="res://scripts/car_spawner.gd" id="1_spawner"]
 [ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
@@ -10,13 +10,46 @@
 [ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="8_pause"]
 [ext_resource type="Material" path="res://materials/terrain.tres" id="9_ground"]
 [ext_resource type="Script" path="res://scripts/nature.gd" id="10_nature"]
-[ext_resource type="Texture2D" path="res://assets/textures/pine_bark/pine_bark_diff_1k.jpg" id="11_bark"]
-[ext_resource type="Texture2D" path="res://assets/textures/pine_bark/pine_bark_nor_gl_1k.jpg" id="12_bark_n"]
-[ext_resource type="PackedScene" path="res://assets/models/rock_07/rock_07_1k.gltf" id="13_rock07"]
-[ext_resource type="PackedScene" path="res://assets/models/rock_09/rock_09_1k.gltf" id="14_rock09"]
-[ext_resource type="PackedScene" path="res://assets/models/namaqualand_boulder_05/namaqualand_boulder_05_1k.gltf" id="15_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallA.glb" id="11_tree_pineTallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallB.glb" id="12_tree_pineTallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallC.glb" id="13_tree_pineTallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallD.glb" id="14_tree_pineTallD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundA.glb" id="15_tree_pineRoundA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundB.glb" id="16_tree_pineRoundB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundC.glb" id="17_tree_pineRoundC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineDefaultA.glb" id="18_tree_pineDefaultA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineDefaultB.glb" id="19_tree_pineDefaultB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_default.glb" id="20_tree_default"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_oak.glb" id="21_tree_oak"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_fat.glb" id="22_tree_fat"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallA.glb" id="23_stone_smallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallB.glb" id="24_stone_smallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallC.glb" id="25_stone_smallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallD.glb" id="26_stone_smallD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallE.glb" id="27_stone_smallE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallF.glb" id="28_stone_smallF"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallG.glb" id="29_stone_smallG"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeA.glb" id="30_stone_largeA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeB.glb" id="31_stone_largeB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeC.glb" id="32_stone_largeC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeD.glb" id="33_stone_largeD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeE.glb" id="34_stone_largeE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeF.glb" id="35_stone_largeF"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallA.glb" id="36_stone_tallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallB.glb" id="37_stone_tallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallC.glb" id="38_stone_tallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallE.glb" id="39_stone_tallE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bush.glb" id="40_plant_bush"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushLarge.glb" id="41_plant_bushLarge"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushDetailed.glb" id="42_plant_bushDetailed"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/grass_large.glb" id="43_grass_large"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.22, 0.48, 0.86, 1)
+sky_horizon_color = Color(0.68, 0.82, 0.95, 1)
+ground_bottom_color = Color(0.35, 0.5, 0.3, 1)
+ground_horizon_color = Color(0.68, 0.82, 0.95, 1)
+sun_angle_max = 20.0
 
 [sub_resource type="Sky" id="Sky_main"]
 sky_material = SubResource("ProceduralSkyMaterial_sky")
@@ -24,33 +57,37 @@ sky_material = SubResource("ProceduralSkyMaterial_sky")
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 2
 sky = SubResource("Sky_main")
-tonemap_mode = 2
+tonemap_mode = 1
+tonemap_white = 6.0
 ssao_enabled = true
+ssao_intensity = 1.5
 fog_enabled = true
-fog_light_color = Color(0.62, 0.7, 0.8, 1)
-fog_density = 0.0025
-fog_aerial_perspective = 0.2
+fog_light_color = Color(0.72, 0.84, 0.95, 1)
+fog_density = 0.0018
+fog_sky_affect = 0.0
+adjustment_enabled = true
+adjustment_saturation = 1.15
 
 [sub_resource type="Resource" id="SurfaceType_dirt"]
 script = ExtResource("5_surface")
 display_name = "Dirt"
 grip = 1.0
 drag = 0.0
-color = Color(0.58, 0.45, 0.3, 1)
+color = Color(0.47, 0.69, 0.29, 1)
 
 [sub_resource type="Resource" id="SurfaceType_mud"]
 script = ExtResource("5_surface")
 display_name = "Mud"
 grip = 0.45
 drag = 0.35
-color = Color(0.3, 0.22, 0.15, 1)
+color = Color(0.45, 0.31, 0.2, 1)
 
 [sub_resource type="Resource" id="SurfaceType_rock"]
 script = ExtResource("5_surface")
 display_name = "Rock"
 grip = 1.4
 drag = 0.0
-color = Color(0.5, 0.5, 0.52, 1)
+color = Color(0.58, 0.57, 0.6, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_hud"]
 font_size = 20
@@ -74,6 +111,8 @@ environment = SubResource("Environment_main")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.2
 shadow_enabled = true
 directional_shadow_max_distance = 200.0
 
@@ -88,10 +127,10 @@ ground_material = ExtResource("9_ground")
 script = ExtResource("10_nature")
 terrain = NodePath("../Terrain")
 checkpoints_root = NodePath("../Checkpoints")
-bark_texture = ExtResource("11_bark")
-bark_normal = ExtResource("12_bark_n")
-rock_scenes = Array[PackedScene]([ExtResource("13_rock07"), ExtResource("14_rock09")])
-boulder_scenes = Array[PackedScene]([ExtResource("15_boulder")])
+tree_scenes = Array[PackedScene]([ExtResource("11_tree_pineTallA"), ExtResource("12_tree_pineTallB"), ExtResource("13_tree_pineTallC"), ExtResource("14_tree_pineTallD"), ExtResource("15_tree_pineRoundA"), ExtResource("16_tree_pineRoundB"), ExtResource("17_tree_pineRoundC"), ExtResource("18_tree_pineDefaultA"), ExtResource("19_tree_pineDefaultB"), ExtResource("20_tree_default"), ExtResource("21_tree_oak"), ExtResource("22_tree_fat")])
+rock_scenes = Array[PackedScene]([ExtResource("23_stone_smallA"), ExtResource("24_stone_smallB"), ExtResource("25_stone_smallC"), ExtResource("26_stone_smallD"), ExtResource("27_stone_smallE"), ExtResource("28_stone_smallF"), ExtResource("29_stone_smallG")])
+boulder_scenes = Array[PackedScene]([ExtResource("30_stone_largeA"), ExtResource("31_stone_largeB"), ExtResource("32_stone_largeC"), ExtResource("33_stone_largeD"), ExtResource("34_stone_largeE"), ExtResource("35_stone_largeF"), ExtResource("36_stone_tallA"), ExtResource("37_stone_tallB"), ExtResource("38_stone_tallC"), ExtResource("39_stone_tallE")])
+bush_scenes = Array[PackedScene]([ExtResource("40_plant_bush"), ExtResource("41_plant_bushLarge"), ExtResource("42_plant_bushDetailed"), ExtResource("43_grass_large")])
 
 [node name="CarSpawner" type="Marker3D" parent="." node_paths=PackedStringArray("camera", "race", "hud")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)

@@ -1,7 +1,7 @@
 @tool
 class_name Nature
 extends Node3D
-## Scatters trees and rocks over the terrain.
+## Scatters trees, rocks and bushes over the terrain.
 ##
 ## How it works:
 ## 1. We pick random spots on the map, one at a time. A RandomNumberGenerator
@@ -11,13 +11,16 @@ extends Node3D
 ##    to the line between the checkpoints, not too close to another tree or
 ##    rock, and on the right kind of ground. Trees grow on dirt in forests
 ##    (a noise decides where the forests are). Rocks like rocky slopes.
-## 3. Trees are drawn with one MultiMeshInstance3D: it draws the same mesh
-##    hundreds of times in a single go, which is much faster than hundreds of
-##    separate nodes. Each tree trunk gets a simple cylinder for collision.
-## 4. Rocks are real scanned rock models (from Poly Haven). They get their own
-##    MeshInstance3D each, so Godot can use a simpler version (a "LOD", level
-##    of detail) for rocks that are far away. Each rock gets a convex
-##    collision shape, a simple "shrink-wrapped" version of its shape.
+## 3. All models are low-poly models from Kenney's Nature Kit, the same
+##    cartoon style as the cars. Each model is only about 1 m big, so we scale
+##    it up to the size we want (in metres).
+## 4. Trees and bushes are drawn with MultiMeshInstance3D nodes, one per
+##    model: a MultiMesh draws the same mesh hundreds of times in a single go,
+##    which is much faster than hundreds of separate nodes. Each tree trunk
+##    gets a simple cylinder for collision. Bushes have no collision, you
+##    just drive through them.
+## 5. Rocks get their own node each, with a convex collision shape: a simple
+##    "shrink-wrapped" version of the rock's shape.
 ##
 ## Like the terrain, this script runs in the editor too ("@tool"). Press
 ## "Regenerate" in the Inspector after changing a setting.
@@ -36,6 +39,7 @@ extends Node3D
 @export var tree_count := 450
 @export var rock_count := 120
 @export var boulder_count := 18
+@export var bush_count := 700
 ## Change this to get a different layout of trees and rocks.
 @export var nature_seed := 3
 
@@ -48,16 +52,32 @@ extends Node3D
 ## Stay this far away from the edge of the map (where the walls are).
 @export var edge_margin := 20.0
 
-@export_group("Look")
-## The bark texture for the tree trunks.
-@export var bark_texture: Texture2D
-@export var bark_normal: Texture2D
-## The colour of the pine needles.
-@export var needle_color := Color(0.16, 0.27, 0.12)
-## Scanned rock models (.gltf). Small and medium rocks are picked from these.
+@export_group("Models")
+## Tree models (.glb). A random one is picked for every tree.
+@export var tree_scenes: Array[PackedScene] = []
+## How tall the trees are, in metres (a random height in this range).
+@export var tree_height := Vector2(7.0, 14.0)
+## Small and medium rocks are picked from these.
 @export var rock_scenes: Array[PackedScene] = []
+## How wide the small rocks are, in metres.
+@export var rock_size := Vector2(1.5, 5.0)
 ## Big boulders.
 @export var boulder_scenes: Array[PackedScene] = []
+@export var boulder_size := Vector2(5.0, 9.0)
+## Bushes and grass tufts, just for decoration.
+@export var bush_scenes: Array[PackedScene] = []
+@export var bush_size := Vector2(0.8, 2.0)
+## Kenney's Nature Kit is coloured teal and orange. We repaint it to fit our
+## green hills: each material name in the models gets the colour listed here.
+@export var palette := {
+	"leafsGreen": Color(0.42, 0.66, 0.25),
+	"leafsDark": Color(0.2, 0.46, 0.24),
+	"woodBark": Color(0.52, 0.34, 0.2),
+	"woodBarkDark": Color(0.42, 0.28, 0.18),
+	"grass": Color(0.4, 0.64, 0.24),
+	"stone": Color(0.6, 0.6, 0.62),
+	"dirt": Color(0.55, 0.4, 0.27),
+}
 
 var _rng := RandomNumberGenerator.new()
 var _forest_noise := FastNoiseLite.new()
@@ -66,8 +86,8 @@ var _forest_noise := FastNoiseLite.new()
 # only look at things in the squares next to it, not at everything.
 var _placed := {}
 const GRID_CELL := 8.0
-# Rock models we already looked at, so we only do it once.
-var _rock_kinds := {}
+# Models we already looked at, so we only do it once.
+var _kinds := {}
 var _route := PackedVector2Array()
 
 
@@ -92,9 +112,10 @@ func regenerate() -> void:
 	_build_route()
 
 	# Boulders first, since they are the biggest and hardest to fit.
-	_place_rocks(boulder_scenes, boulder_count, 3.0, 6.0, true)
-	_place_rocks(rock_scenes, rock_count, 6.0, 20.0, false)
+	_place_rocks(boulder_scenes, boulder_count, boulder_size, true)
+	_place_rocks(rock_scenes, rock_count, rock_size, false)
 	_place_trees()
+	_place_bushes()
 
 
 # --- Where things may go -----------------------------------------------------
@@ -151,15 +172,106 @@ func _remember(spot: Vector3, radius: float) -> void:
 	_placed[cell].append(Vector3(spot.x, spot.z, radius))
 
 
-# --- Rocks -------------------------------------------------------------------
+# --- Models ------------------------------------------------------------------
 
-func _place_rocks(scenes: Array[PackedScene], count: int, min_scale: float,
-		max_scale: float, prefer_rock: bool) -> void:
+# Loads a model and remembers what we need from it: its mesh, its collision
+# points, and how big it is (at scale 1).
+func _load_kind(scene: PackedScene) -> Dictionary:
+	if scene == null:
+		return {}
+	if _kinds.has(scene):
+		return _kinds[scene]
+	var root := scene.instantiate()
+	var mesh_instance := _find_mesh_instance(root)
+	var result := {}
+	if mesh_instance:
+		var mesh := mesh_instance.mesh
+		var aabb := mesh.get_aabb()
+		# create_convex_shape(true, true) makes a simplified convex hull: few
+		# points, cheap for the physics engine.
+		var hull: ConvexPolygonShape3D = mesh.create_convex_shape(true, true)
+		# Kenney's models are plain colours, one material per colour. We give
+		# each material its colour from our palette, make it fully matte, and
+		# let it take a tint from the MultiMesh (instance colour) so every
+		# tree can be a slightly different shade.
+		var materials := []
+		for i in mesh.get_surface_count():
+			var material := mesh.surface_get_material(i)
+			if material is StandardMaterial3D:
+				material = material.duplicate()
+				if palette.has(material.resource_name):
+					material.albedo_color = palette[material.resource_name]
+				material.roughness = 1.0
+				material.vertex_color_use_as_albedo = true
+			materials.append(material)
+		result = {
+			"mesh": mesh,
+			"materials": materials,
+			"points": hull.points,
+			# Where the model's bottom is, so we can put it on the ground.
+			"bottom": aabb.position.y,
+			"radius": maxf(aabb.size.x, aabb.size.z) * 0.5,
+			"height": aabb.size.y,
+		}
+	root.free()
+	_kinds[scene] = result
+	return result
+
+
+func _load_kinds(scenes: Array[PackedScene]) -> Array:
 	var kinds := []
 	for scene in scenes:
-		var kind := _load_rock(scene)
+		var kind := _load_kind(scene)
 		if not kind.is_empty():
 			kinds.append(kind)
+	return kinds
+
+
+func _find_mesh_instance(node: Node) -> MeshInstance3D:
+	if node is MeshInstance3D:
+		return node
+	for child in node.get_children():
+		var found := _find_mesh_instance(child)
+		if found:
+			return found
+	return null
+
+
+# Makes one MultiMeshInstance3D that draws `kind` at all the transforms.
+func _add_multimesh(node_name: String, kind: Dictionary, transforms: Array,
+		colors: Array) -> void:
+	if transforms.is_empty():
+		return
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_colors = true
+	# A MultiMesh draws the mesh with the mesh's own materials, so we give it
+	# a copy of the mesh that has our matte, tintable materials.
+	var mesh: ArrayMesh = kind.mesh.duplicate()
+	for i in kind.materials.size():
+		mesh.surface_set_material(i, kind.materials[i])
+	multimesh.mesh = mesh
+	multimesh.instance_count = transforms.size()
+	for i in transforms.size():
+		multimesh.set_instance_transform(i, transforms[i])
+		multimesh.set_instance_color(i, colors[i])
+	var instance := MultiMeshInstance3D.new()
+	instance.name = node_name
+	instance.multimesh = multimesh
+	add_child(instance)
+
+
+# A colour close to white, to tint a model a little lighter or darker.
+func _random_tint(amount: float) -> Color:
+	var shade := _rng.randf_range(1.0 - amount, 1.0)
+	return Color(shade * _rng.randf_range(0.92, 1.0), shade, shade * _rng.randf_range(0.9, 1.0))
+
+
+# --- Rocks -------------------------------------------------------------------
+
+func _place_rocks(scenes: Array[PackedScene], count: int, size_range: Vector2,
+		prefer_rock: bool) -> void:
+	var kinds := _load_kinds(scenes)
 	if kinds.is_empty():
 		return
 
@@ -168,7 +280,8 @@ func _place_rocks(scenes: Array[PackedScene], count: int, min_scale: float,
 	while placed < count and tries < count * 40:
 		tries += 1
 		var kind: Dictionary = kinds[_rng.randi() % kinds.size()]
-		var rock_scale := _rng.randf_range(min_scale, max_scale)
+		# Scale the model so it is as wide as we want, in metres.
+		var rock_scale: float = _rng.randf_range(size_range.x, size_range.y) / (kind.radius * 2.0)
 		var radius: float = kind.radius * rock_scale
 		var spot := _find_spot(radius)
 		if spot == Vector3.INF:
@@ -186,59 +299,11 @@ func _place_rocks(scenes: Array[PackedScene], count: int, min_scale: float,
 		# it into the ground so it doesn't look like it is floating.
 		var up := Vector3.UP.lerp(terrain.get_normal_at(spot), 0.6).normalized()
 		var rotation_basis := Basis(Quaternion(Vector3.UP, up)) * Basis(Vector3.UP, _rng.randf() * TAU)
-		var origin: Vector3 = to_local(spot - up * kind.height * rock_scale * 0.2)
+		var sink: float = kind.bottom + kind.height * 0.15
+		var origin: Vector3 = to_local(spot - up * sink * rock_scale)
 		_add_rock(kind, Transform3D(rotation_basis, origin), rock_scale)
 		_remember(spot, radius)
 		placed += 1
-
-
-# Loads a rock model and remembers what we need from it: its mesh, its
-# collision points, and how big it is.
-func _load_rock(scene: PackedScene) -> Dictionary:
-	if scene == null:
-		return {}
-	if _rock_kinds.has(scene):
-		return _rock_kinds[scene]
-	var root := scene.instantiate()
-	var mesh_instance := _find_mesh_instance(root)
-	var result := {}
-	if mesh_instance:
-		var mesh := mesh_instance.mesh
-		var aabb := mesh.get_aabb()
-		# create_convex_shape(true, true) makes a simplified convex hull: few
-		# points, cheap for the physics engine.
-		var hull: ConvexPolygonShape3D = mesh.create_convex_shape(true, true)
-		# The scanned rocks come with a "roughness" texture that makes them a
-		# bit shiny once they are scaled up to boulder size. We make a copy of
-		# each material that is evenly rough (matte) instead.
-		var materials := []
-		for i in mesh.get_surface_count():
-			var material := mesh.surface_get_material(i)
-			if material is StandardMaterial3D:
-				material = material.duplicate()
-				material.roughness_texture = null
-				material.roughness = 0.9
-			materials.append(material)
-		result = {
-			"mesh": mesh,
-			"materials": materials,
-			"points": hull.points,
-			"radius": maxf(aabb.size.x, aabb.size.z) * 0.5,
-			"height": aabb.size.y,
-		}
-	root.free()
-	_rock_kinds[scene] = result
-	return result
-
-
-func _find_mesh_instance(node: Node) -> MeshInstance3D:
-	if node is MeshInstance3D:
-		return node
-	for child in node.get_children():
-		var found := _find_mesh_instance(child)
-		if found:
-			return found
-	return null
 
 
 func _add_rock(kind: Dictionary, xform: Transform3D, rock_scale: float) -> void:
@@ -268,17 +333,29 @@ func _add_rock(kind: Dictionary, xform: Transform3D, rock_scale: float) -> void:
 # --- Trees -------------------------------------------------------------------
 
 func _place_trees() -> void:
-	var transforms: Array[Transform3D] = []
-	var colors: Array[Color] = []
+	var kinds := _load_kinds(tree_scenes)
+	if kinds.is_empty():
+		return
+	# One list of transforms and colours per model.
+	var transforms := []
+	var colors := []
+	for kind in kinds:
+		transforms.append([])
+		colors.append([])
 	var trunks := StaticBody3D.new()
 	trunks.name = "TreeTrunks"
 	add_child(trunks)
 
+	var placed := 0
 	var tries := 0
-	while transforms.size() < tree_count and tries < tree_count * 30:
+	while placed < tree_count and tries < tree_count * 30:
 		tries += 1
-		var tree_scale := _rng.randf_range(0.7, 1.4)
-		var spot := _find_spot(1.6 * tree_scale)
+		var k := _rng.randi() % kinds.size()
+		var kind: Dictionary = kinds[k]
+		var tree_height_m := _rng.randf_range(tree_height.x, tree_height.y)
+		var tree_scale: float = tree_height_m / kind.height
+		var radius: float = maxf(kind.radius * tree_scale * 0.6, 1.2)
+		var spot := _find_spot(radius)
 		if spot == Vector3.INF:
 			continue
 		# Trees grow in forests: only where the forest noise is high enough,
@@ -293,108 +370,66 @@ func _place_trees() -> void:
 
 		var local := to_local(spot)
 		var rotation_basis := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3.ONE * tree_scale)
-		# Sink the trunk a little so it sits nicely on slopes.
-		transforms.append(Transform3D(rotation_basis, local + Vector3.DOWN * 0.4))
-		# A slightly different green for every tree.
-		var shade := _rng.randf_range(0.7, 1.0)
-		colors.append(Color(shade * _rng.randf_range(0.85, 1.0), shade, shade * _rng.randf_range(0.8, 1.0)))
-		_remember(spot, 1.6 * tree_scale)
+		# Put the bottom of the model on the ground, sunk a little so it sits
+		# nicely on slopes.
+		var origin: Vector3 = local + Vector3.DOWN * (kind.bottom * tree_scale + 0.3)
+		transforms[k].append(Transform3D(rotation_basis, origin))
+		colors[k].append(_random_tint(0.25))
+		_remember(spot, radius)
+		placed += 1
 
 		# The trunk is what the car can hit.
 		var shape := CylinderShape3D.new()
-		shape.radius = 0.35 * tree_scale
-		shape.height = 6.0 * tree_scale
+		shape.radius = 0.035 * tree_height_m
+		shape.height = tree_height_m * 0.6
 		var collision := CollisionShape3D.new()
 		collision.shape = shape
 		collision.position = local + Vector3.UP * shape.height * 0.5
 		trunks.add_child(collision)
 
-	var multimesh := MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true
-	multimesh.mesh = _make_pine_mesh()
-	multimesh.instance_count = transforms.size()
-	for i in transforms.size():
-		multimesh.set_instance_transform(i, transforms[i])
-		multimesh.set_instance_color(i, colors[i])
-	var trees := MultiMeshInstance3D.new()
-	trees.name = "Trees"
-	trees.multimesh = multimesh
-	add_child(trees)
+	for k in kinds.size():
+		_add_multimesh("Trees%d" % k, kinds[k], transforms[k], colors[k])
 
 
-## Builds a simple pine tree out of a trunk and a few stacked cones.
-## The tree is about 11 m tall at scale 1.
-func _make_pine_mesh() -> ArrayMesh:
-	var mesh := ArrayMesh.new()
+# --- Bushes ------------------------------------------------------------------
 
-	# The trunk: a cylinder that gets thinner towards the top.
-	var trunk := SurfaceTool.new()
-	trunk.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_add_cone(trunk, 0.0, 9.0, 0.32, 0.06, 8, 0.0, Color.WHITE, Color.WHITE, 3.0)
-	trunk.generate_normals()
-	trunk.generate_tangents()
-	trunk.commit(mesh)
-	var bark := StandardMaterial3D.new()
-	bark.albedo_texture = bark_texture
-	bark.normal_enabled = bark_normal != null
-	bark.normal_texture = bark_normal
-	bark.roughness = 0.95
-	mesh.surface_set_material(0, bark)
+# Bushes and grass tufts. They are only decoration: no collision, and they
+# may stand close to the route (but not on it) and near trees.
+func _place_bushes() -> void:
+	var kinds := _load_kinds(bush_scenes)
+	if kinds.is_empty():
+		return
+	var transforms := []
+	var colors := []
+	for kind in kinds:
+		transforms.append([])
+		colors.append([])
+	var half := terrain.size / 2.0 - edge_margin
+	var placed := 0
+	var tries := 0
+	while placed < bush_count and tries < bush_count * 20:
+		tries += 1
+		var spot := terrain.to_global(Vector3(_rng.randf_range(-half, half), 0.0,
+				_rng.randf_range(-half, half)))
+		var flat := Vector2(spot.x, spot.z)
+		if flat.distance_to(Vector2(start_position.x, start_position.z)) < start_clearance * 0.6:
+			continue
+		if _distance_to_route(flat) < route_clearance * 0.5:
+			continue
+		if terrain.get_surface_at(spot) != terrain.dirt:
+			continue
+		# More bushes in and around the forests.
+		if _forest_noise.get_noise_2d(spot.x, spot.z) < -0.1 and _rng.randf() > 0.3:
+			continue
+		spot.y = terrain.get_height_at(spot)
+		var k := _rng.randi() % kinds.size()
+		var kind: Dictionary = kinds[k]
+		var bush_scale: float = _rng.randf_range(bush_size.x, bush_size.y) / (kind.radius * 2.0)
+		var rotation_basis := Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3.ONE * bush_scale)
+		var origin: Vector3 = to_local(spot) + Vector3.DOWN * (kind.bottom * bush_scale + 0.1)
+		transforms[k].append(Transform3D(rotation_basis, origin))
+		colors[k].append(_random_tint(0.2))
+		placed += 1
 
-	# The needles: layers of cones, each a bit smaller than the one below.
-	# The bottom of each layer is darker, like it is in its own shadow.
-	var needles := SurfaceTool.new()
-	needles.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var layers := 5
-	for i in layers:
-		var t := float(i) / layers
-		var bottom := 2.0 + t * 7.0
-		var height := 3.4 - t * 1.4
-		var radius := 2.4 - t * 1.7
-		_add_cone(needles, bottom, bottom + height, radius, 0.0, 11, 0.6,
-				Color(0.5, 0.5, 0.5), Color(1, 1, 1), 1.0)
-	needles.generate_normals()
-	needles.commit(mesh)
-	var needle_material := StandardMaterial3D.new()
-	needle_material.albedo_color = needle_color
-	# Multiplies the colour with the vertex colour (the dark layer bottoms)
-	# and with each tree's own colour from the MultiMesh.
-	needle_material.vertex_color_use_as_albedo = true
-	needle_material.roughness = 0.9
-	needle_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mesh.surface_set_material(1, needle_material)
-	return mesh
-
-
-## Adds a cone (or a cylinder, if top_radius > 0) to a SurfaceTool.
-## `jitter` pushes the bottom ring in and out, so needle layers look ragged.
-func _add_cone(st: SurfaceTool, y0: float, y1: float, bottom_radius: float,
-		top_radius: float, sides: int, jitter: float, bottom_color: Color,
-		top_color: Color, v_repeat: float) -> void:
-	for i in sides:
-		var a0 := TAU * i / sides
-		var a1 := TAU * (i + 1) / sides
-		var r0 := bottom_radius + (jitter if i % 2 == 0 else -jitter * 0.5)
-		var r1 := bottom_radius + (jitter if (i + 1) % 2 == 0 else -jitter * 0.5)
-		if (i + 1) == sides:
-			r1 = bottom_radius + jitter  # Close the ring where it started.
-		var b0 := Vector3(cos(a0) * r0, y0, sin(a0) * r0)
-		var b1 := Vector3(cos(a1) * r1, y0, sin(a1) * r1)
-		var t0 := Vector3(cos(a0) * top_radius, y1, sin(a0) * top_radius)
-		var t1 := Vector3(cos(a1) * top_radius, y1, sin(a1) * top_radius)
-		var u0 := float(i) / sides
-		var u1 := float(i + 1) / sides
-		# Two triangles per side, corners in clockwise order seen from outside.
-		_vertex(st, b0, Vector2(u0, v_repeat), bottom_color)
-		_vertex(st, b1, Vector2(u1, v_repeat), bottom_color)
-		_vertex(st, t0, Vector2(u0, 0.0), top_color)
-		_vertex(st, b1, Vector2(u1, v_repeat), bottom_color)
-		_vertex(st, t1, Vector2(u1, 0.0), top_color)
-		_vertex(st, t0, Vector2(u0, 0.0), top_color)
-
-
-func _vertex(st: SurfaceTool, point: Vector3, uv: Vector2, color: Color) -> void:
-	st.set_color(color)
-	st.set_uv(uv)
-	st.add_vertex(point)
+	for k in kinds.size():
+		_add_multimesh("Bushes%d" % k, kinds[k], transforms[k], colors[k])

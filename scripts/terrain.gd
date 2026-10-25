@@ -15,7 +15,8 @@ extends StaticBody3D
 ##    (what the physics engine touches).
 ## 5. Each vertex remembers how much dirt, mud and rock it has (in its
 ##    colour: red = dirt, green = mud, blue = rock). The terrain shader
-##    (shaders/terrain.gdshader) reads that and paints real photo textures.
+##    (shaders/terrain.gdshader) reads that and paints the ground in a
+##    low-poly cartoon style, to match the cars and the trees.
 ##
 ## "@tool" at the top means this script also runs inside the editor, so you
 ## see the hills there too. Change a setting, then press "Regenerate".
@@ -51,8 +52,9 @@ signal regenerated
 @export var rock: SurfaceType
 
 @export_group("Look")
-## The material that paints the ground. materials/terrain.tres uses real
-## textures. Leave it empty to paint each surface its plain colour instead.
+## The material that paints the ground. materials/terrain.tres paints it in
+## a flat-shaded low-poly style. Leave it empty to paint each surface its
+## plain colour instead, with smooth shading.
 @export var ground_material: Material
 
 # The numbers we store per grid point to remember its surface.

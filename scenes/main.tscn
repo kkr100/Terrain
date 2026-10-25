@@ -1,4 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/car.tscn" id="1_car"]
+[ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 
@@ -11,10 +15,37 @@ sky = SubResource("Sky_main")
 tonemap_mode = 2
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-size = Vector2(100, 100)
+size = Vector2(200, 200)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.45, 0.38, 0.28, 1)
+uv1_scale = Vector3(100, 100, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ramp"]
+size = Vector3(6, 0.4, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ramp"]
+size = Vector3(6, 0.4, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_props"]
+albedo_color = Color(0.55, 0.5, 0.42, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bump"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 8.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_bump"]
+radius = 0.25
+height = 8.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_hud"]
+font_size = 20
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Node3D"]
 
@@ -25,10 +56,74 @@ environment = SubResource("Environment_main")
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 0)
 shadow_enabled = true
 
-[node name="Ground" type="MeshInstance3D" parent="."]
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("PlaneMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 6, 15)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="TestProps" type="Node3D" parent="."]
+
+[node name="Ramp" type="StaticBody3D" parent="TestProps"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.9, 30)
+
+[node name="Mesh" type="MeshInstance3D" parent="TestProps/Ramp"]
+mesh = SubResource("BoxMesh_ramp")
+surface_material_override/0 = SubResource("StandardMaterial3D_props")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Ramp"]
+shape = SubResource("BoxShape3D_ramp")
+
+[node name="Bump1" type="StaticBody3D" parent="TestProps"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 10)
+
+[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump1"]
+mesh = SubResource("CylinderMesh_bump")
+surface_material_override/0 = SubResource("StandardMaterial3D_props")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump1"]
+shape = SubResource("CylinderShape3D_bump")
+
+[node name="Bump2" type="StaticBody3D" parent="TestProps"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 14)
+
+[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump2"]
+mesh = SubResource("CylinderMesh_bump")
+surface_material_override/0 = SubResource("StandardMaterial3D_props")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump2"]
+shape = SubResource("CylinderShape3D_bump")
+
+[node name="Bump3" type="StaticBody3D" parent="TestProps"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 15, 0, 18)
+
+[node name="Mesh" type="MeshInstance3D" parent="TestProps/Bump3"]
+mesh = SubResource("CylinderMesh_bump")
+surface_material_override/0 = SubResource("StandardMaterial3D_props")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestProps/Bump3"]
+shape = SubResource("CylinderShape3D_bump")
+
+[node name="Car" parent="." instance=ExtResource("1_car")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="ChaseCamera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7)
 current = true
+script = ExtResource("2_camera")
+target = NodePath("../Car")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="SpeedLabel" type="Label" parent="HUD" node_paths=PackedStringArray("car")]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 800.0
+offset_bottom = 120.0
+label_settings = SubResource("LabelSettings_hud")
+script = ExtResource("3_hud")
+car = NodePath("../../Car")

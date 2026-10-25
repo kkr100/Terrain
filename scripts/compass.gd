@@ -49,7 +49,10 @@ func _draw() -> void:
 		else:
 			draw_line(Vector2(x, 8), Vector2(x, 18), Color(1, 1, 1, 0.5), 2.0)
 
-	# The points of interest you haven't found yet.
+	# The points of interest you haven't found yet. First we work out where
+	# each marker goes, then sort them from left to right, so we can move a
+	# distance label down a row when it would overlap the one before it.
+	var markers := []
 	for point in exploration.points:
 		if exploration.is_found(point):
 			continue
@@ -63,6 +66,15 @@ func _draw() -> void:
 			# Behind you: show it at the edge, pointing the way to turn.
 			var left := wrapf(_bearing(offset) - heading, -PI, PI) < 0.0
 			x = 10.0 if left else size.x - 10.0
+		markers.append([x, distance])
+	markers.sort()
+	var last_x := -INF
+	var row := 0
+	for marker: Array in markers:
+		var x: float = marker[0]
+		var distance: float = marker[1]
+		row = (row + 1) % 2 if x - last_x < 60.0 else 0
+		last_x = x
 		var text := "?" if distance > 120.0 else "!"
 		draw_circle(Vector2(x, 44), 11.0, Color(0, 0, 0, 0.6))
 		draw_circle(Vector2(x, 44), 11.0, marker_color, false, 2.0)
@@ -71,8 +83,9 @@ func _draw() -> void:
 		var label := "%d m" % roundi(distance)
 		var label_width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		var label_x := clampf(x - label_width / 2.0, 0.0, size.x - label_width)
-		draw_string_outline(font, Vector2(label_x, 74), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color.BLACK)
-		draw_string(font, Vector2(label_x, 74), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, marker_color)
+		var label_y := 74.0 + row * 16.0
+		draw_string_outline(font, Vector2(label_x, label_y), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color.BLACK)
+		draw_string(font, Vector2(label_x, label_y), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, marker_color)
 
 	# A little triangle in the middle: "you are pointing here".
 	draw_colored_polygon(PackedVector2Array([Vector2(middle - 7, 0), Vector2(middle + 7, 0),

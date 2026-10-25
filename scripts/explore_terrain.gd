@@ -178,6 +178,7 @@ func _setup() -> void:
 	_hill_noise.fractal_octaves = 4
 	_mud_noise.seed = map_seed + 2
 	_mud_noise.frequency = 0.01
+	_mud_noise.fractal_octaves = 2
 
 	_sites.clear()
 	_site_dips.clear()

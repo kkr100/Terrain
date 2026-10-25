@@ -172,7 +172,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -900, 0, -600)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 850, 0, 500)
 
 [node name="Lookout" parent="PointsOfInterest" instance=ExtResource("55_poi_lookout")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -350, 0, -800)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -460, 0, -860)
 
 [node name="Woodcutter" parent="PointsOfInterest" instance=ExtResource("56_poi_woodcutter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -950, 0, 400)

@@ -45,6 +45,7 @@ func _ready() -> void:
 	_make_upgrade_pickers()
 	_show_car()
 	_drive_button.grab_focus()
+	DevConsole.unlocks_changed.connect(_on_unlocks_changed)
 
 
 func _process(delta: float) -> void:
@@ -182,6 +183,16 @@ func _show_upgrades() -> void:
 		_upgrade_info.text = "Find places in Explore mode to unlock upgrades."
 	else:
 		_upgrade_info.text = "Each car keeps its own upgrades."
+
+
+## The dev console (the ` key) can unlock or relock every upgrade while this
+## screen is open, so we remake the drop-downs to match.
+func _on_unlocks_changed() -> void:
+	for child in _upgrades_grid.get_children():
+		_upgrades_grid.remove_child(child)
+		child.queue_free()
+	_make_upgrade_pickers()
+	_show_car()
 
 
 func _on_upgrade_picked(item: int, picker: OptionButton) -> void:

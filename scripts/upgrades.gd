@@ -61,7 +61,24 @@ static func unlocked_by_place(place_id: String) -> CarUpgrade:
 
 
 static func is_unlocked(upgrade: CarUpgrade) -> bool:
-	return Exploration.load_found().has(upgrade.unlocked_by)
+	return unlock_all_on() or Exploration.load_found().has(upgrade.unlocked_by)
+
+
+## True if the dev console's "unlock_all" command is switched on. It's a
+## separate flag in the [dev] section of user://save.cfg, so it doesn't
+## pretend you found places you never drove to: "relock" switches it off and
+## everything you really found stays unlocked.
+static func unlock_all_on() -> bool:
+	var file := ConfigFile.new()
+	file.load(SAVE_PATH)
+	return file.get_value("dev", "unlock_all", false)
+
+
+static func set_unlock_all(on: bool) -> void:
+	var file := ConfigFile.new()
+	file.load(SAVE_PATH)  # Keep anything else that's already saved.
+	file.set_value("dev", "unlock_all", on)
+	file.save(SAVE_PATH)
 
 
 static func unlocked_count() -> int:

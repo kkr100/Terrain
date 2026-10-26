@@ -147,8 +147,10 @@ func _physics_process(delta: float) -> void:
 			# Moving forward and pressing "back": that is a brake.
 			brake = max_brake * -throttle
 		elif -speed * 3.6 < max_reverse_kmh:
-			# Almost stopped or rolling back: "back" means reverse, at half power.
-			engine_force = max_engine_force * 0.5 * throttle
+			# Almost stopped or rolling back: "back" means reverse. Reverse gets
+			# the same power as forward, like a real low reverse gear, or the car
+			# can't back up a hill it could drive up.
+			engine_force = max_engine_force * throttle
 
 	if Input.is_action_pressed("handbrake") or not controls_enabled:
 		brake = max_brake

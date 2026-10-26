@@ -1,8 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/car.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://assets/models/kenney_cars/suv.glb" id="2_model"]
 [ext_resource type="Script" path="res://scripts/engine_sound.gd" id="3_sound"]
+[ext_resource type="AudioStream" uid="uid://cypo1s3tqi0n0" path="res://sounds/engines/suv_900.wav" id="snd_900"]
+[ext_resource type="AudioStream" uid="uid://bibpcth2n2mwn" path="res://sounds/engines/suv_1700.wav" id="snd_1700"]
+[ext_resource type="AudioStream" uid="uid://gtk0pknh5sya" path="res://sounds/engines/suv_2880.wav" id="snd_2880"]
+[ext_resource type="AudioStream" uid="uid://dfkc6lhht0lrr" path="res://sounds/engines/suv_3670.wav" id="snd_3670"]
+[ext_resource type="AudioStream" uid="uid://dfqgfeyp56k7p" path="res://sounds/engines/suv_4390.wav" id="snd_4390"]
+[ext_resource type="AudioStream" uid="uid://b0u3oi3w0f70r" path="res://sounds/engines/suv_5230.wav" id="snd_5230"]
+[ext_resource type="AudioStream" uid="uid://dnt0ujsht5l2w" path="res://sounds/engines/suv_6350.wav" id="snd_6350"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_body"]
 size = Vector3(1.9, 1.0, 3.5)
@@ -88,14 +95,12 @@ suspension_max_force = 25000.0
 damping_compression = 1.8
 damping_relaxation = 2.8
 
-[node name="EngineSound" type="AudioStreamPlayer" parent="."]
-volume_db = -3.0
+[node name="EngineSound" type="Node" parent="."]
 script = ExtResource("3_sound")
-cylinders = 6
-sharpness = 18.0
-rumble = 0.12
-hiss = 0.15
-brightness_hz = 2200.0
+loops = Array[AudioStream]([ExtResource("snd_900"), ExtResource("snd_1700"), ExtResource("snd_2880"), ExtResource("snd_3670"), ExtResource("snd_4390"), ExtResource("snd_5230"), ExtResource("snd_6350")])
+loop_rpms = PackedFloat32Array(900.0, 1700.0, 2880.0, 3670.0, 4390.0, 5230.0, 6350.0)
+volume_db = -2.0
+coasting_cutoff_hz = 900.0
 
 [node name="Mounts" type="Node3D" parent="."]
 

@@ -88,7 +88,7 @@ so you never need to commit it.
 | `upgrades/` | The 12 car upgrades, one `.tres` file each. |
 | `scenes/upgrade_parts/` | The parts you can see on an upgraded car: the rally wing, the roof light bar and the nitro exhaust. |
 | `scripts/car.gd` | Used by all three cars. Reads the keyboard and tells the car to drive, brake and steer. |
-| `scripts/engine_sound.gd` | Makes each car's engine noise in code, following the RPM. |
+| `scripts/engine_sound.gd` | Plays each car's engine noise from recorded loops, following the RPM. |
 | `scripts/car_choice.gd` | The list of cars (names, descriptions, stat bars) and which one you picked. |
 | `scripts/car_spawner.gd` | Puts the car you picked, with its upgrades, into the race. |
 | `scripts/car_upgrade.gd` | Describes one upgrade: its slot, which place unlocks it, and how it changes the car. |
@@ -172,7 +172,7 @@ Car (VehicleBody3D)        the physics body; scripts/car.gd is attached here
 ├── CollisionShape3D       a box, the shape that bumps into things
 ├── Model                  the 3D model (a .glb file), just looks, no physics
 ├── WheelFrontLeft … WheelRearRight (VehicleWheel3D)
-└── EngineSound (AudioStreamPlayer)  the engine noise; scripts/engine_sound.gd
+└── EngineSound (Node)     the engine noise; scripts/engine_sound.gd
 ```
 
 All three use the same script. What makes them feel different is only
@@ -204,16 +204,25 @@ stable. Try raising it to 0.5 and taking a sharp turn at speed!
 
 ### The engine sound
 
-There are no sound files: `engine_sound.gd` makes the sound while the game
-runs, with an `AudioStreamGenerator`. A sound is a long list of numbers
-between -1 and 1 that the speaker follows, 22050 of them each second here.
-Each time a cylinder fires the script plays a short "bang" that fades out.
-Faster RPM means the bangs come closer together, so the note gets higher.
-That's why a 4-cylinder buzzes and a V8 rumbles. `car.gd` works out the RPM
-and gear from the speed, like an automatic gearbox, and the HUD shows both.
+The engine noise comes from real recordings of a 4-cylinder, a 6-cylinder and
+a V8 engine. `tools/make_engine_loops.py` cut them into short **loops** in
+`sounds/engines/`: about a second of the engine at one steady RPM, cut so
+the end flows straight into the start. Each car has 7 or 8 of them, from idle
+to the redline (the number in the file name is the RPM).
 
-Select a car's `EngineSound` node and try `cylinders`, `sharpness`, `rumble`
-(an uneven, lumpy V8 sound) and `brightness_hz` (lower sounds more muffled).
+`engine_sound.gd` plays the two loops closest to the engine's RPM at the same
+time and blends between them, and speeds each one up or down a little
+(`pitch_scale`) so it matches the RPM exactly. `car.gd` works out the RPM and
+gear from the speed, like an automatic gearbox, and the HUD shows both.
+With your foot off the pedal a **low-pass filter** (an audio effect that
+turns down the high, sharp parts of a sound) muffles the engine, and when
+the gearbox changes up the throttle is cut for a moment, like a real gear
+change.
+
+Select a car's `EngineSound` node and try `volume_db` and
+`coasting_cutoff_hz` (lower is more muffled when you let go of the pedal).
+While the game runs, the **Audio** tab at the bottom of the editor shows the
+engine's own bus with the filter on it.
 
 ### The physics
 

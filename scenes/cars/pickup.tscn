@@ -1,9 +1,16 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/car.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://assets/models/kenney_cars/truck.glb" id="2_model"]
 [ext_resource type="Script" path="res://scripts/engine_sound.gd" id="3_sound"]
 [ext_resource type="Texture2D" path="res://assets/models/kenney_cars/Textures/colormap_blue.png" id="4_paint"]
+[ext_resource type="AudioStream" uid="uid://h4fs246v0o6i" path="res://sounds/engines/pickup_700.wav" id="snd_700"]
+[ext_resource type="AudioStream" uid="uid://swo1j52qhnk0" path="res://sounds/engines/pickup_1110.wav" id="snd_1110"]
+[ext_resource type="AudioStream" uid="uid://dcsvwt8ns26qs" path="res://sounds/engines/pickup_1590.wav" id="snd_1590"]
+[ext_resource type="AudioStream" uid="uid://dvh2wqh0w2ml1" path="res://sounds/engines/pickup_1760.wav" id="snd_1760"]
+[ext_resource type="AudioStream" uid="uid://4a64luullgnj" path="res://sounds/engines/pickup_2500.wav" id="snd_2500"]
+[ext_resource type="AudioStream" uid="uid://cisl6su272d64" path="res://sounds/engines/pickup_3500.wav" id="snd_3500"]
+[ext_resource type="AudioStream" uid="uid://k2xiks7abbgt" path="res://sounds/engines/pickup_4800.wav" id="snd_4800"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_body"]
 size = Vector3(2.1, 1.05, 4.3)
@@ -90,14 +97,12 @@ suspension_max_force = 40000.0
 damping_compression = 1.6
 damping_relaxation = 2.6
 
-[node name="EngineSound" type="AudioStreamPlayer" parent="."]
-volume_db = -2.0
+[node name="EngineSound" type="Node" parent="."]
 script = ExtResource("3_sound")
-cylinders = 8
-sharpness = 12.0
-rumble = 0.45
-hiss = 0.1
-brightness_hz = 1400.0
+loops = Array[AudioStream]([ExtResource("snd_700"), ExtResource("snd_1110"), ExtResource("snd_1590"), ExtResource("snd_1760"), ExtResource("snd_2500"), ExtResource("snd_3500"), ExtResource("snd_4800")])
+loop_rpms = PackedFloat32Array(700.0, 1110.0, 1590.0, 1760.0, 2500.0, 3500.0, 4800.0)
+volume_db = 0.0
+coasting_cutoff_hz = 700.0
 
 [node name="Mounts" type="Node3D" parent="."]
 

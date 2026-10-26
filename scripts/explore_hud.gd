@@ -98,7 +98,7 @@ func _on_message_done() -> void:
 		_show_next_message()
 
 
-# Makes a short "ding-ding-ding" sound in code (like the engine sound), so we
+# Makes a short "ding-ding-ding" sound in code, so we
 # don't need a sound file: three notes going up, each fading out.
 func _make_chime() -> AudioStreamWAV:
 	var rate := 22050

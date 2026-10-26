@@ -40,3 +40,15 @@ signposts, the fishing stand and more. They share `Textures/colormap.png`.
 
 The ground has no textures: `shaders/terrain.gdshader` paints it with plain
 colours.
+
+## Engine sounds (`sounds/engines/`)
+
+Made from three engine recordings that Kristoffer provided for this project
+(a 4-cylinder, a 6-cylinder and a V8). `tools/make_engine_loops.py` cut them
+into the loops; it lists exactly which seconds of each recording were used.
+
+| Files | Recording | Used for |
+| --- | --- | --- |
+| `rally_*.wav` | 4-cylinder | Rally Hatch |
+| `suv_*.wav` | 6-cylinder | Trail SUV |
+| `pickup_*.wav` | V8 | Heavy Pickup |

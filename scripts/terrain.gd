@@ -98,6 +98,37 @@ func get_normal_at(world_position: Vector3) -> Vector3:
 	return _normal_at(cell.x, cell.y)
 
 
+## A small top-down picture of the map, like a paper map: each surface in its
+## colour, with light and shadow on the slopes so you can see the hills. The
+## level-select screen shows it. This works even before the terrain is in a
+## scene, because it only works out the heights and surfaces (not the mesh
+## or the collision, which take longer).
+func make_map_image(pixels := 128) -> Image:
+	if _heights.is_empty():
+		_make_default_surfaces()
+		_build_heights()
+		_build_surfaces()
+	var image := Image.create(pixels, pixels, false, Image.FORMAT_RGB8)
+	var n := _points()
+	# Use the same colours as the ground in the game.
+	var colors := [dirt.color, mud.color, rock.color]
+	if ground_material is ShaderMaterial:
+		colors = [ground_material.get_shader_parameter("dirt_color"),
+				ground_material.get_shader_parameter("mud_color"),
+				ground_material.get_shader_parameter("rock_color")]
+	# Light comes from the top left of the map, like on most paper maps.
+	var light := Vector3(-1.0, 1.5, -1.0).normalized()
+	for py in pixels:
+		for px in pixels:
+			# Like the Explore map: -Z (north) is at the top.
+			var x := roundi(float(px) / (pixels - 1) * size)
+			var z := roundi(float(py) / (pixels - 1) * size)
+			var color: Color = colors[_surfaces[z * n + x]]
+			var shade := clampf(_normal_at(x, z).dot(light), 0.0, 1.0)
+			image.set_pixel(px, py, color * lerpf(0.45, 1.3, shade))
+	return image
+
+
 # --- Building the terrain ----------------------------------------------------
 
 # Number of grid points along one side. 256 cells need 257 points.
@@ -146,7 +177,7 @@ func _build_heights() -> void:
 	var half := size / 2.0
 	_heights.resize(n * n)
 	# The height at the very centre, so we can shift the map to put the
-	# start area at height 0 (where the car is placed in main.tscn).
+	# start area at height 0 (where the car is placed in race_base.tscn).
 	var centre_height := _noise_height(noise, 0.0, 0.0)
 
 	for z in n:

@@ -3,7 +3,7 @@ extends Marker3D
 ## Puts the car you picked on the car-select screen at this spot when the
 ## level starts, and tells the camera and everything else which car it is.
 ##
-## The car isn't part of main.tscn or explore.tscn, because it depends on your
+## The car isn't part of the race levels or explore.tscn, because it depends on your
 ## choice. This node comes before the camera, the HUD and so on in the Scene
 ## panel, so its _ready runs first and the car is there before they need it.
 

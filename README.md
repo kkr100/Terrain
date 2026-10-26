@@ -8,8 +8,11 @@ Pick one of three cars, a light rally hatch, a trail SUV or a heavy pickup,
 and drive it across hilly offroad country with dirt, mud and rock, each with
 its own grip. There are two ways to play:
 
-- **Point to point:** drive through 8 checkpoints and the finish line, in
-  order, as fast as you can. The game remembers your best time with each car.
+- **Point to point:** pick one of three levels, then drive through every
+  checkpoint and the finish line, in order, as fast as you can. **Green
+  Valley** (easy) is gentle green hills, **Mud Marsh** (medium) is flat,
+  grey and half deep mud, and **Rocky Ridge** (hard) is steep and rocky, at
+  sunset. The game remembers your best time on each level with each car.
 - **Explore:** roam a huge map, 2.5 km across (ten times wider than the race
   map), and find 12 hidden places: a campsite, an old wreck, a lookout tower,
   standing stones and more. The game remembers which ones you found.
@@ -22,12 +25,12 @@ its own grip. There are two ways to play:
 3. Start Godot. In the Project Manager, click **Import**, pick the
    `project.godot` file in this folder, then click **Import & Edit**.
 4. Press **F5** (or the ▶ play button in the top right) to run the game.
-   The main menu opens. Click **Point to point** or **Explore** (or press
-   Enter), pick a car, then click **Drive!**.
+   The main menu opens. Click **Point to point** (then pick a level) or
+   **Explore** (or press Enter), pick a car, then click **Drive!**.
    Close the window or press **F8** to stop it.
 
 Want to skip the menu while you're working on the map or the car? Open
-`scenes/main.tscn` (the race) or `scenes/explore.tscn` (Explore) and press
+a level in `scenes/levels/` (a race) or `scenes/explore.tscn` (Explore) and press
 **F6** (or the "Run current scene" button). That runs just the scene you have
 open.
 
@@ -72,10 +75,12 @@ so you never need to commit it.
 | `project.godot` | The project's settings: its name, window size, and which scene starts first. Godot edits this for you when you change **Project > Project Settings**. |
 | `export_presets.cfg` | The settings for making a Windows, Linux or macOS build. See "Making a desktop build" below. |
 | `scenes/main_menu.tscn` | The main menu, the first thing that loads when the game runs. |
-| `scenes/main.tscn` | The race: the map, the car, the checkpoints, the camera and the HUD. |
+| `scenes/race_base.tscn` | Everything a race needs: the sky, the map, the car, the camera and the HUD. Every level is built on top of it. |
+| `scenes/levels/` | The three point-to-point levels. Each one changes the terrain, the sky and the checkpoints of `race_base.tscn`. |
+| `scenes/level_select.tscn` | The level-select screen, with a map of each level and its route. |
 | `scenes/explore.tscn` | Explore mode: the big map, the points of interest, the camera and its HUD. |
 | `scenes/poi/` | The 12 points of interest, one small scene each. |
-| `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). `main.tscn` uses it nine times. |
+| `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). Each level uses it 9 to 12 times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
 | `scenes/car_select.tscn` | The car-select screen, with a 3D preview of each car. |
 | `scenes/cars/rally.tscn`, `suv.tscn`, `pickup.tscn` | The three cars: model, wheels, suspension and engine sound. |
@@ -88,7 +93,10 @@ so you never need to commit it.
 | `scripts/hud.gd` | Shows the speed, the race info, the countdown and the finish screen. |
 | `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
 | `scripts/checkpoint.gd` | Notices when the car drives through a checkpoint, and changes its colour. |
-| `scripts/best_time.gd` | Saves and loads your best time with each car. |
+| `scripts/best_time.gd` | Saves and loads your best time on each level with each car. |
+| `scripts/level_choice.gd` | The list of levels (names, difficulty, descriptions) and which one you picked. |
+| `scripts/level_select.gd` | Makes the level-select screen work. |
+| `scripts/level_map.gd` | Draws a level's map and route on the level-select screen. |
 | `scripts/main_menu.gd` | Makes the mode buttons and Quit work. |
 | `scripts/game_mode.gd` | The list of modes, and which one you picked. |
 | `scripts/explore_terrain.gd` | Builds the big Explore map in chunks, with less detail far away. |
@@ -118,11 +126,11 @@ a light, a camera, a 3D model, a sound. Nodes are arranged in a tree, and a
 saved tree of nodes is called a **scene** (a `.tscn` file). A scene can be a
 whole level, or something small like a car that you reuse inside other scenes.
 
-Open `scenes/main.tscn` and look at the **Scene** panel on the left. It shows
-this tree:
+Open `scenes/levels/green_valley.tscn` and look at the **Scene** panel on the
+left. It shows this tree:
 
 ```
-Main (Node3D)              the root; every other node hangs under it
+GreenValley (Node3D)       the root; every other node hangs under it
 ├── WorldEnvironment       the sky and overall lighting look
 ├── Sun (DirectionalLight3D)  sunlight coming from one direction, with shadows
 ├── Terrain (StaticBody3D)  the hilly ground; scripts/terrain.gd builds it
@@ -234,7 +242,7 @@ reads the keys with `Input.get_axis(...)` and sets `engine_force`, `brake` and
 when you select the car, so you can tune the top speed or engine power without
 editing code.
 
-**Which car is in the race?** `main.tscn` doesn't contain a car. Instead the
+**Which car is in the race?** The levels don't contain a car. Instead the
 `CarSpawner` node asks `CarChoice` which car you picked, loads that scene,
 and puts it at its own position. Then it tells the camera, the race and the
 HUD which car to follow.
@@ -257,7 +265,7 @@ makes it feel smooth. Try changing `follow_speed` and `distance` on the
 
 ## How the terrain works
 
-Select the `Terrain` node in `scenes/main.tscn`. Its script,
+Select the `Terrain` node in a level, like `scenes/levels/green_valley.tscn`. Its script,
 `scripts/terrain.gd`, builds the whole map from code when the game starts.
 It does four things:
 
@@ -341,8 +349,11 @@ To change how it looks, open `materials/terrain.tres` in the Inspector:
 | `mud_roughness` | 1 is matte, 0 is like a mirror. Mud is a bit shinier because it's wet. |
 
 The sky, sun and fog are on the `WorldEnvironment` and `Sun` nodes in
-`main.tscn`: a clear blue sky, a warm sun, light blue haze in the distance,
-and a little extra colour (Adjustments > Saturation) for the cartoon look.
+`race_base.tscn`: a clear blue sky, a warm sun, light blue haze in the
+distance, and a little extra colour (Adjustments > Saturation) for the
+cartoon look. Mud Marsh and Rocky Ridge swap in their own: a grey, foggy day
+and an orange sunset. They also use their own ground colours,
+`materials/terrain_marsh.tres` and `materials/terrain_ridge.tres`.
 
 If you empty the Terrain's `ground_material`, the terrain goes back to the
 old plain colours (each surface's `color`), with smooth shading.
@@ -414,14 +425,15 @@ by itself every time the game starts).
 The game is a few scenes that take turns on screen:
 
 ```
-                    Point to point                          --> main.tscn     (the race)
-main_menu.tscn  ------------------->  car_select.tscn  --Drive!
-                    Explore                                 --> explore.tscn  (free roam)
+                 Point to point
+main_menu.tscn ----------------> level_select.tscn --> car_select.tscn --Drive!--> scenes/levels/<level>.tscn
+               \    Explore                                ^
+                `-----------------------------------------'  --Drive!--> explore.tscn  (free roam)
 ```
 
-The mode button you click is saved by `scripts/game_mode.gd`. The
-car-select screen shows it in its title, and "Drive!" loads that mode's
-scene. "Main menu" in the pause menu goes back to the start.
+The mode button you click is saved by `scripts/game_mode.gd`, and the level
+you pick by `scripts/level_choice.gd`. The car-select screen shows both in
+its title, and "Drive!" loads the level (or the Explore map). "Main menu" in the pause menu goes back to the start.
 
 The car-select screen shows the real car scene inside a **SubViewport**: a
 small, separate 3D world (with its own light, floor and camera) drawn inside
@@ -430,7 +442,7 @@ and you can hear its engine.
 
 **Project > Project Settings > Application > Run > Main Scene** says which
 one opens first (the menu). A script switches to another scene with
-`get_tree().change_scene_to_file("res://scenes/main.tscn")`, and
+`get_tree().change_scene_to_file("res://scenes/car_select.tscn")`, and
 `get_tree().reload_current_scene()` starts the same one over, which is all
 "Restart" does.
 
@@ -469,14 +481,14 @@ next, and tells each one how to look (next, waiting or done).
 
 The timer is just a number: every frame, `race.gd` adds `delta` (the
 seconds since the last frame) to `elapsed`. When you finish, it compares
-your time with the best one for that car and saves it to `user://save.cfg`
+your time with the best one for that level and car and saves it to `user://save.cfg`
 (the car you picked is saved there too). `user://` is
 a folder Godot gives every game for save files, so it works the same on
 every computer.
 
 ### Make your own route
 
-Select a checkpoint under `Checkpoints` in `scenes/main.tscn` and drag it
+Select a checkpoint under `Checkpoints` in one of the levels and drag it
 somewhere else with the move tool, or type new X and Z values in the
 Inspector. You don't need to get the height right: when the race starts,
 each checkpoint is moved onto the ground. The order of the checkpoints in
@@ -486,9 +498,43 @@ finish. To add one, right-click a checkpoint and pick **Duplicate**.
 If you change `map_seed` on the Terrain, move the checkpoints too, or some
 may end up on top of a cliff.
 
+### Levels
+
+Every level is a scene in `scenes/levels/`, and they are all built on top of
+`scenes/race_base.tscn`. That's called an **inherited scene**: it starts as
+a copy of the base scene and only saves what's different. Open
+`scenes/levels/mud_marsh.tscn` and you'll see the same nodes as in every
+race. The names of the nodes that it changes have a little icon next to them;
+in the Inspector, the changed settings have a ↺ "revert" arrow next to
+them. Mud Marsh changes:
+
+- **Terrain:** another `map_seed`, low hills (`hill_height`), lots of mud
+  (`mud_amount`), and its own "Deep mud" surface with less grip and more drag
+  than normal mud.
+- **WorldEnvironment** and **Sun:** a grey sky, thicker fog and a weaker sun.
+- **Nature:** fewer trees and more bushes.
+- **Race:** its `level_id`, so the best times are saved for this level.
+- **Checkpoints:** its own route.
+
+If you change something in `race_base.tscn` (say, the HUD), every level gets
+it, unless the level changed that same setting itself.
+
+To make a fourth level: in the FileSystem panel, right-click
+`scenes/race_base.tscn` and pick **New Inherited Scene**. Select the Terrain
+and change `map_seed` and the other settings (press **Regenerate** to see
+them). Drag `scenes/checkpoint.tscn` onto `Checkpoints` a few times and move
+the checkpoints around. The last one is the finish. Select `Race` and give
+it a new `level_id`. Save it in `scenes/levels/`, then add it to the
+`LEVELS` list in `scripts/level_choice.gd` with the same id. It then shows
+up on the level-select screen, with its map.
+
+Before you add a checkpoint, check that you can drive there: steep slopes
+show up grey (rock) on the map. Every route in the game was test-driven from
+start to finish by a simple self-driving script with all three cars.
+
 ## How Explore mode works
 
-Open `scenes/explore.tscn`. It looks a lot like `main.tscn`, but with a much
+Open `scenes/explore.tscn`. It looks a lot like a race level, but with a much
 bigger map and no checkpoints:
 
 ```

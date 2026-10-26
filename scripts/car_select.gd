@@ -37,7 +37,7 @@ func _ready() -> void:
 	# The panel covers the right side of the screen, so shift the camera's
 	# view to put the car in the middle of the part you can see.
 	_camera.h_offset = 1.8
-	$Title.text = "Choose your car: %s" % GameMode.selected().name
+	$Title.text = "Choose your car: %s" % _title()
 	_index = CarChoice.selected_index()
 	_show_car()
 	_drive_button.grab_focus()
@@ -75,8 +75,11 @@ func _show_car() -> void:
 	_name_label.text = info.name
 	_count_label.text = "%d / %d" % [_index + 1, CarChoice.CARS.size()]
 	_description_label.text = info.description
-	var best := BestTime.read(info.id)
-	_best_label.text = "Best time: %s" % BestTime.format(best) if best >= 0.0 else "No best time with this car yet"
+	if GameMode.selected().id == "point_to_point":
+		var best := BestTime.read(LevelChoice.selected().id, info.id)
+		_best_label.text = "Best time: %s" % BestTime.format(best) if best >= 0.0 else "No best time with this car yet"
+	else:
+		_best_label.text = ""
 	_show_stats(info.stats)
 
 	# Swap the 3D car for the new one.
@@ -110,9 +113,21 @@ func _show_stats(stats: Dictionary) -> void:
 
 func _on_drive_pressed() -> void:
 	CarChoice.select(_index)
-	# Load the scene of the mode you picked in the main menu.
-	get_tree().change_scene_to_file(GameMode.selected().scene)
+	# Load the level (or the Explore map) you picked before.
+	get_tree().change_scene_to_file(GameMode.scene_to_play())
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	# Back to the screen before this one.
+	if GameMode.selected().id == "point_to_point":
+		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+
+# "Point to point: Green Valley", or just "Explore".
+func _title() -> String:
+	var mode := GameMode.selected()
+	if mode.id == "point_to_point":
+		return "%s, %s" % [mode.name, LevelChoice.selected().name]
+	return mode.name

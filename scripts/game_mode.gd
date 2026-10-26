@@ -1,19 +1,23 @@
 class_name GameMode
 ## The ways you can play, and which one you picked last time.
 ##
-## The main menu has a button for each mode. Picking one saves it here, then
-## the car-select screen opens, and "Drive!" loads that mode's scene.
+## The main menu has a button for each mode. Picking one saves it here and
+## opens the mode's first screen: the level select for point to point, the
+## car select for Explore. "Drive!" on the car-select screen then loads the
+## scene to play (scene_to_play below).
 
 const MODES := [
 	{
 		"id": "point_to_point",
 		"name": "Point to point",
-		"scene": "res://scenes/main.tscn",
+		"first_screen": "res://scenes/level_select.tscn",
+		# No "scene": each level has its own (see LevelChoice).
 		"description": "Race through every checkpoint, in order, as fast as you can.",
 	},
 	{
 		"id": "explore",
 		"name": "Explore",
+		"first_screen": "res://scenes/car_select.tscn",
 		"scene": "res://scenes/explore.tscn",
 		"description": "Roam a huge map, ten times wider than the race map, and find all the hidden places.",
 	},
@@ -31,6 +35,15 @@ static func selected() -> Dictionary:
 		if mode.id == id:
 			return mode
 	return MODES[0]
+
+
+## The scene to load when you press "Drive!": the picked level in point to
+## point, the big map in Explore.
+static func scene_to_play() -> String:
+	var mode := selected()
+	if mode.id == "point_to_point":
+		return LevelChoice.selected().scene
+	return mode.scene
 
 
 static func select(id: String) -> void:

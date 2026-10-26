@@ -1,6 +1,6 @@
 extends Control
-## The car-select screen: flip through the cars, see (and hear) each one, then
-## drive the one you like.
+## The car-select screen: flip through the cars, see (and hear) each one, fit
+## the upgrades you unlocked in Explore mode, then drive the one you like.
 ##
 ## The 3D car on the left lives in a SubViewport: a small separate 3D world
 ## drawn inside the menu, with its own light, floor and camera. We put the real
@@ -23,6 +23,9 @@ var _orbit_angle := 0.6
 @onready var _description_label: Label = $Panel/Box/DescriptionLabel
 @onready var _stats: GridContainer = $Panel/Box/Stats
 @onready var _best_label: Label = $Panel/Box/BestLabel
+@onready var _upgrades_title: Label = $Panel/Box/UpgradesTitle
+@onready var _upgrades_grid: GridContainer = $Panel/Box/Upgrades
+@onready var _upgrade_info: Label = $Panel/Box/UpgradeInfo
 @onready var _drive_button: Button = $Panel/Box/DriveButton
 
 
@@ -39,6 +42,7 @@ func _ready() -> void:
 	_camera.h_offset = 1.8
 	$Title.text = "Choose your car: %s" % _title()
 	_index = CarChoice.selected_index()
+	_make_upgrade_pickers()
 	_show_car()
 	_drive_button.grab_focus()
 
@@ -80,22 +84,36 @@ func _show_car() -> void:
 		_best_label.text = "Best time: %s" % BestTime.format(best) if best >= 0.0 else "No best time with this car yet"
 	else:
 		_best_label.text = ""
+	# No best times in Explore mode, so hide the label to save space.
+	_best_label.visible = _best_label.text != ""
+	_show_upgrades()
 	_show_stats(info.stats)
+	_show_preview()
 
+
+## Puts the picked car, with its upgrades, on the stage.
+func _show_preview() -> void:
+	var info: Dictionary = CarChoice.CARS[_index]
 	# Swap the 3D car for the new one.
 	if _car:
 		_car.queue_free()
 	_car = load(info.scene).instantiate()
 	_car.controls_enabled = false
+	_car.upgrades = Upgrades.fitted(info.id)
 	_car_spot.add_child(_car)
 	# Give it a little rev as it rolls in, so you hear its engine.
 	_car.rpm = _car.redline_rpm * 0.8
 
 
-## One row per stat: a name, then a bar from 1 to 5.
+## One row per stat: a name, a bar from 1 to 5, and how much the fitted
+## upgrades change it ("+1" in green, "-1" in red).
 func _show_stats(stats: Dictionary) -> void:
 	for child in _stats.get_children():
 		child.queue_free()
+	var bonus := {}
+	for upgrade in Upgrades.fitted(CarChoice.CARS[_index].id):
+		for stat_name in upgrade.stat_bonus:
+			bonus[stat_name] = bonus.get(stat_name, 0) + upgrade.stat_bonus[stat_name]
 	for stat_name in stats:
 		var label := Label.new()
 		label.text = stat_name
@@ -109,6 +127,75 @@ func _show_stats(stats: Dictionary) -> void:
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		_stats.add_child(bar)
+		var change: int = bonus.get(stat_name, 0)
+		var change_label := Label.new()
+		change_label.custom_minimum_size = Vector2(28, 0)
+		change_label.add_theme_font_size_override("font_size", 18)
+		if change > 0:
+			change_label.text = "+%d" % change
+			change_label.modulate = Color(0.5, 1.0, 0.45)
+		elif change < 0:
+			change_label.text = str(change)
+			change_label.modulate = Color(1.0, 0.5, 0.4)
+		_stats.add_child(change_label)
+
+
+## Makes one row per slot (Engine, Tyres, ...): its name and a drop-down list
+## (an OptionButton) of the upgrades for that slot. Locked ones are greyed out.
+func _make_upgrade_pickers() -> void:
+	for slot: String in Upgrades.SLOTS:
+		var label := Label.new()
+		label.text = slot
+		label.add_theme_font_size_override("font_size", 18)
+		_upgrades_grid.add_child(label)
+		var picker := OptionButton.new()
+		picker.name = slot
+		picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		picker.add_theme_font_size_override("font_size", 16)
+		picker.get_popup().add_theme_font_size_override("font_size", 16)
+		picker.add_item("Stock")
+		for upgrade in Upgrades.in_slot(slot):
+			if Upgrades.is_unlocked(upgrade):
+				picker.add_item(upgrade.display_name)
+			else:
+				picker.add_item("Locked: explore to find it")
+				picker.set_item_disabled(picker.item_count - 1, true)
+			# Each item remembers its upgrade, so we know what was picked.
+			picker.set_item_metadata(picker.item_count - 1, upgrade)
+		picker.item_selected.connect(_on_upgrade_picked.bind(picker))
+		# Show what an upgrade does while you hover over it in the list.
+		picker.get_popup().id_focused.connect(_on_upgrade_hovered.bind(picker))
+		_upgrades_grid.add_child(picker)
+	_upgrades_title.text = "Upgrades: %d / %d unlocked" % [Upgrades.unlocked_count(), Upgrades.PATHS.size()]
+
+
+## Sets each slot's drop-down to the upgrade fitted to this car.
+func _show_upgrades() -> void:
+	var fitted := Upgrades.fitted(CarChoice.CARS[_index].id)
+	for slot: String in Upgrades.SLOTS:
+		var picker: OptionButton = _upgrades_grid.get_node(slot)
+		picker.select(0)  # Stock
+		for i in picker.item_count:
+			if picker.get_item_metadata(i) in fitted:
+				picker.select(i)
+	if Upgrades.unlocked_count() == 0:
+		_upgrade_info.text = "Find places in Explore mode to unlock upgrades."
+	else:
+		_upgrade_info.text = "Each car keeps its own upgrades."
+
+
+func _on_upgrade_picked(item: int, picker: OptionButton) -> void:
+	var upgrade: CarUpgrade = picker.get_item_metadata(item)
+	Upgrades.fit(CarChoice.CARS[_index].id, picker.name, upgrade)
+	_show_stats(CarChoice.CARS[_index].stats)
+	_show_preview()
+	_upgrade_info.text = upgrade.description if upgrade else "The car's own %s." % String(picker.name).to_lower()
+
+
+func _on_upgrade_hovered(item: int, picker: OptionButton) -> void:
+	var upgrade: CarUpgrade = picker.get_item_metadata(item)
+	if upgrade and Upgrades.is_unlocked(upgrade):
+		_upgrade_info.text = upgrade.description
 
 
 func _on_drive_pressed() -> void:

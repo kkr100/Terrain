@@ -33,8 +33,11 @@ func _process(_delta: float) -> void:
 	# linear_velocity is in metres per second. Multiply by 3.6 for km/h.
 	var kmh := absf(car.get_forward_speed()) * 3.6
 	var ground: String = car.surface_name if car.surface_name != "" else "In the air"
-	_speed_label.text = "%d km/h   gear %d   %d rpm   %s\n%s" % [roundi(kmh), car.gear,
-			roundi(car.rpm / 100.0) * 100, ground, CONTROLS]
+	var nitro := ""
+	if car.boost_power > 0.0:
+		nitro = "   nitro %d%% (Shift)" % roundi(car.nitro * 100.0)
+	_speed_label.text = "%d km/h   gear %d   %d rpm   %s%s\n%s" % [roundi(kmh), car.gear,
+			roundi(car.rpm / 100.0) * 100, ground, nitro, CONTROLS]
 
 	var total := race.checkpoints.size()
 	var text: String = race.level().name + "\n"

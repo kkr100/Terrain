@@ -1,11 +1,12 @@
 extends CanvasLayer
 ## Everything drawn on top of the world in Explore mode: speed, how many
-## places you've found, the compass, the "Discovered!" message and the map.
+## places you've found, the compass, the "Discovered!" and "Upgrade
+## unlocked!" messages and the map.
 
 ## The car whose speed we show. CarSpawner fills this in.
 @export var car: Car
 @export var exploration: Exploration
-## How long the "Discovered!" message stays, in seconds.
+## How long each message stays, in seconds.
 @export var message_time := 5.0
 
 const CONTROLS := "W / Up: drive   S / Down: brake, reverse   A D / Left Right: steer\nSpace: handbrake   R: flip the car back up   M: map   Esc or P: pause"
@@ -20,6 +21,8 @@ const CONTROLS := "W / Up: drive   S / Down: brake, reverse   A D / Left Right: 
 @onready var _chime: AudioStreamPlayer = $Chime
 
 var _message_tween: Tween
+# Messages waiting for their turn: each is [title, name, text].
+var _message_queue: Array[Array] = []
 
 
 func _ready() -> void:
@@ -35,8 +38,11 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var kmh := absf(car.get_forward_speed()) * 3.6
 	var ground: String = car.surface_name if car.surface_name != "" else "In the air"
-	_speed_label.text = "%d km/h   gear %d   %d rpm   %s\n%s" % [roundi(kmh), car.gear,
-			roundi(car.rpm / 100.0) * 100, ground, CONTROLS]
+	var nitro := ""
+	if car.boost_power > 0.0:
+		nitro = "   nitro %d%% (Shift)" % roundi(car.nitro * 100.0)
+	_speed_label.text = "%d km/h   gear %d   %d rpm   %s%s\n%s" % [roundi(kmh), car.gear,
+			roundi(car.rpm / 100.0) * 100, ground, nitro, CONTROLS]
 	_found_label.text = "Places found: %d / %d" % [exploration.found.size(), exploration.points.size()]
 
 
@@ -49,28 +55,47 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_discovered(point: PointOfInterest) -> void:
 	_chime.play()
 	_show_message("Discovered!", point.display_name, point.description)
+	# Every place has a car upgrade hidden there.
+	var upgrade := Upgrades.unlocked_by_place(point.id)
+	if upgrade:
+		_show_message("Upgrade unlocked!", upgrade.display_name,
+				"%s\nFit it to your car on the car-select screen (%s slot)." % [upgrade.description, upgrade.slot])
 
 
 func _on_all_discovered() -> void:
-	# Wait until the last "Discovered!" message is gone.
-	await get_tree().create_timer(message_time).timeout
 	_show_message("You found them all!", "Well done, explorer!",
 			"Keep driving around, or go back to the menu with Esc.")
 
 
+## Shows a message in the box at the top. If another message is still
+## showing, this one waits in the queue until that one is gone.
 func _show_message(title: String, place_name: String, text: String) -> void:
+	_message_queue.append([title, place_name, text])
+	if _message_queue.size() == 1:
+		_show_next_message()
+
+
+func _show_next_message() -> void:
+	var title: String = _message_queue[0][0]
+	var place_name: String = _message_queue[0][1]
+	var text: String = _message_queue[0][2]
 	_message_title.text = title
 	_message_name.text = place_name
 	_message_text.text = text
 	_message.show()
 	_message.modulate.a = 1.0
 	# A Tween changes a value over time: wait, then fade the message out.
-	if _message_tween:
-		_message_tween.kill()
 	_message_tween = create_tween()
 	_message_tween.tween_interval(message_time)
 	_message_tween.tween_property(_message, "modulate:a", 0.0, 0.8)
-	_message_tween.tween_callback(_message.hide)
+	_message_tween.tween_callback(_on_message_done)
+
+
+func _on_message_done() -> void:
+	_message.hide()
+	_message_queue.pop_front()
+	if not _message_queue.is_empty():
+		_show_next_message()
 
 
 # Makes a short "ding-ding-ding" sound in code (like the engine sound), so we

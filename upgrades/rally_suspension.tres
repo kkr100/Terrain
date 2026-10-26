@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "rally_suspension"
+display_name = "Rally suspension"
+slot = "Suspension"
+description = "Lower and stiffer springs. The car leans less in turns, but feels the bumps more."
+unlocked_by = "standing_stones"
+stat_bonus = {
+"Handling": 1
+}
+ride_height_add = -0.05
+travel_scale = 0.8
+stiffness_scale = 1.4
+roll_scale = 0.6

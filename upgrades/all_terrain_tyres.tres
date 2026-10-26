@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "all_terrain_tyres"
+display_name = "All-terrain tyres"
+slot = "Tyres"
+description = "Good at everything: a bit more grip everywhere, and mud slows you down less."
+unlocked_by = "woodcutter"
+stat_bonus = {
+"Handling": 1,
+"Mud": 1
+}
+grip_scale = 1.1
+mud_grip_scale = 1.2
+mud_drag_scale = 0.8

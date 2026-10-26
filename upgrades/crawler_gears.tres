@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "crawler_gears"
+display_name = "Crawler gearbox"
+slot = "Engine"
+description = "Short tractor gears: loads of pulling power for steep hills and deep mud, but 20 km/h lower top speed."
+unlocked_by = "tractor"
+stat_bonus = {
+"Acceleration": 2,
+"Top speed": -1,
+"Mud": 1
+}
+power_scale = 1.6
+top_speed_add = -20.0

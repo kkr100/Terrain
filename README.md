@@ -56,6 +56,7 @@ put back at the last checkpoint you passed.
 | **A D** or **← →** | Steer |
 | **Space** | Handbrake |
 | **R** | Flip the car back onto its wheels |
+| **Shift** | Nitro boost (once you've fitted the Nitro upgrade) |
 | **M** | Open or close the map (Explore mode) |
 | **Esc** or **P** | Pause (and unpause) |
 
@@ -83,12 +84,17 @@ so you never need to commit it.
 | `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). Each level uses it 9 to 12 times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
 | `scenes/car_select.tscn` | The car-select screen, with a 3D preview of each car. |
-| `scenes/cars/rally.tscn`, `suv.tscn`, `pickup.tscn` | The three cars: model, wheels, suspension and engine sound. |
+| `scenes/cars/rally.tscn`, `suv.tscn`, `pickup.tscn` | The three cars: model, wheels, suspension, engine sound, and the spots where upgrade parts go. |
+| `upgrades/` | The 12 car upgrades, one `.tres` file each. |
+| `scenes/upgrade_parts/` | The parts you can see on an upgraded car: the rally wing, the roof light bar and the nitro exhaust. |
 | `scripts/car.gd` | Used by all three cars. Reads the keyboard and tells the car to drive, brake and steer. |
 | `scripts/engine_sound.gd` | Makes each car's engine noise in code, following the RPM. |
 | `scripts/car_choice.gd` | The list of cars (names, descriptions, stat bars) and which one you picked. |
-| `scripts/car_spawner.gd` | Puts the car you picked into the race. |
-| `scripts/car_select.gd` | Makes the car-select screen work. |
+| `scripts/car_spawner.gd` | Puts the car you picked, with its upgrades, into the race. |
+| `scripts/car_upgrade.gd` | Describes one upgrade: its slot, which place unlocks it, and how it changes the car. |
+| `scripts/upgrades.gd` | The list of upgrades, which ones you've unlocked, and which are fitted to each car. |
+| `scripts/nitro_flames.gd` | Shows the nitro flames while you boost. |
+| `scripts/car_select.gd` | Makes the car-select screen work, including fitting upgrades. |
 | `scripts/chase_camera.gd` | Makes the camera follow the car from behind. |
 | `scripts/hud.gd` | Shows the speed, the race info, the countdown and the finish screen. |
 | `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
@@ -105,7 +111,7 @@ so you never need to commit it.
 | `scripts/point_of_interest.gd` | One place to discover: its name, description and how close you must get. |
 | `scripts/tint_model.gd` | Tints a model, for example to make a car look rusty. |
 | `scripts/exploration.gd` | Explore mode's rules: notices when you find a place, and saves it. |
-| `scripts/explore_hud.gd` | Explore mode's HUD: speed, places found, the "Discovered!" message. |
+| `scripts/explore_hud.gd` | Explore mode's HUD: speed, places found, the "Discovered!" and "Upgrade unlocked!" messages. |
 | `scripts/compass.gd` | The compass strip at the top of the screen in Explore mode. |
 | `scripts/explore_map.gd` | The map screen (M) in Explore mode. |
 | `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
@@ -262,6 +268,57 @@ makes it feel smooth. Try changing `follow_speed` and `distance` on the
 - Add a fourth car: duplicate `scenes/cars/suv.tscn`, change its numbers (or
   swap the Model for another car from the Kenney kit), and add it to the
   `CARS` list in `scripts/car_choice.gd`.
+
+### Upgrades
+
+Every point of interest in Explore mode has a car upgrade hidden there. Find
+the place and you unlock its upgrade ("Upgrade unlocked!" pops up after
+"Discovered!"). Then fit it on the car-select screen, in the **Upgrades**
+list under the stat bars. A car has four slots, and each slot holds one
+upgrade, so you have to choose:
+
+| Slot | Upgrades (and where to find them) |
+| --- | --- |
+| Engine | Tuned engine (campsite), Turbocharger (supply cache), Crawler gearbox (tractor) |
+| Tyres | Rally tyres (wreck), All-terrain tyres (woodcutter's camp), Mud tyres (fishing pond) |
+| Suspension | Rally suspension (standing stones), Anti-roll bars (ancient oak), Lift kit (lookout tower) |
+| Body | Lightweight panels (mushroom grove), Rally wing (obelisk), Nitro boost (stone head) |
+
+Each car remembers its own upgrades, and they work in both modes. The green
+and red numbers next to the stat bars show how the fitted upgrades change
+the car.
+
+**How it works.** Each upgrade is a small file in `upgrades/` made from
+`scripts/car_upgrade.gd`, a custom Resource just like the surfaces. Open
+`upgrades/turbo.tres` and look in the Inspector: `unlocked_by` is the id of
+the place that unlocks it, and the numbers say how it changes the car. They
+don't replace the car's own numbers, they change them: `power_scale = 1.25`
+means "25% more power than this car had", so the little rally car and the big
+pickup both get faster, but still feel different.
+
+There's nothing extra in the save file for unlocking: `scripts/upgrades.gd`
+just checks which places you've found. It does save which upgrades are fitted
+to which car, in the `[upgrades]` section of `user://save.cfg`.
+
+When a race or Explore starts, `CarSpawner` hands the car its upgrades
+*before* adding it to the scene. Then the car's `_ready` (in `car.gd`) goes
+through them in `_apply_upgrade` and changes its settings: more engine force,
+bigger wheels, longer springs, less weight, and so on. A few upgrades also do
+something while you drive: the tyres change the grip in `_apply_ground`, the
+wing pushes the car down harder the faster you go, and the nitro gives extra
+power while you hold Shift, until the tank runs dry (the HUD shows how full
+it is).
+
+**The parts you can see** are tiny scenes in `scenes/upgrade_parts/`, built
+from plain boxes and cylinders in the same low-poly style as the Kenney
+cars. Each car scene has a `Mounts` node with three `Marker3D`s, `Roof`,
+`Rear` and `Exhaust`, placed by hand to fit that car's shape. An upgrade's
+`part_mount` says which one its part goes on. Mud tyres don't need a part:
+they just make the wheels bigger.
+
+To make your own upgrade: duplicate a `.tres` in `upgrades/`, give it a new
+`id`, name and numbers, set `unlocked_by` to a place's id, and add its path to
+`PATHS` at the top of `scripts/upgrades.gd`.
 
 ## How the terrain works
 
@@ -627,7 +684,7 @@ the game starts.
 
 To start over, delete `save.cfg` from the game's `user://` folder (the top of
 `scripts/best_time.gd` says where that is on your computer). That also clears
-your best times.
+your best times and locks the upgrades again.
 
 ## Making a desktop build
 
@@ -677,8 +734,8 @@ Macs. That's why it's turned on in
 4. ✅ Game goals, a menu and a desktop build
 
 Since then: real ground textures, trees and rocks, three cars to pick
-from, each with its own engine sound, and an Explore mode on a map ten times
-wider.
+from, each with its own engine sound, an Explore mode on a map ten times
+wider, three levels, and car upgrades you unlock by exploring.
 
 Ideas for what's next: grass and small plants on the ground, sound for the
 wheels and crashes, an arrow pointing to the next checkpoint, rivers and

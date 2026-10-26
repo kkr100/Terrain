@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "light_panels"
+display_name = "Lightweight panels"
+slot = "Body"
+description = "Thin body panels make the car 15% lighter, so it speeds up faster."
+unlocked_by = "mushrooms"
+stat_bonus = {
+"Acceleration": 1
+}
+mass_scale = 0.85

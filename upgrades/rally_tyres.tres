@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "rally_tyres"
+display_name = "Rally tyres"
+slot = "Tyres"
+description = "Sticky tyres from an old rally car: 20% more grip on dirt and rock, but worse in mud."
+unlocked_by = "wreck"
+stat_bonus = {
+"Handling": 1,
+"Mud": -1
+}
+grip_scale = 1.2
+mud_grip_scale = 0.85
+mud_drag_scale = 1.15

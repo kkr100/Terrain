@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/upgrade_parts/nitro_flames.tscn" id="2_part"]
+
+[resource]
+script = ExtResource("1_script")
+id = "nitro"
+display_name = "Nitro boost"
+slot = "Body"
+description = "Hold Shift for a burst of 80% more power and a higher top speed. The tank fills up again slowly."
+unlocked_by = "stone_head"
+stat_bonus = {
+"Top speed": 1,
+"Acceleration": 1
+}
+boost_power = 0.8
+part_scene = ExtResource("2_part")
+part_mount = "Exhaust"

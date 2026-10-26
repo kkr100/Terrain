@@ -41,6 +41,7 @@ func _draw() -> void:
 		if x < 0.0:
 			continue
 		if degrees % 45 == 0:
+			@warning_ignore("integer_division")
 			var text: String = DIRECTIONS[degrees / 45]
 			var font_size := 22 if text.length() == 1 else 16
 			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x

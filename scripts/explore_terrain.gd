@@ -132,6 +132,7 @@ func regenerate() -> void:
 	_setup()
 	if Engine.is_editor_hint():
 		# In the editor: everything, at low detail.
+		@warning_ignore("integer_division")
 		var count := size / chunk_size
 		for cz in count:
 			for cx in count:
@@ -326,6 +327,7 @@ func _chunk_of(world_position: Vector3) -> Vector2i:
 
 
 func _in_map(chunk: Vector2i) -> bool:
+	@warning_ignore("integer_division")
 	var count := size / chunk_size
 	return chunk.x >= 0 and chunk.y >= 0 and chunk.x < count and chunk.y < count
 
@@ -414,6 +416,7 @@ func _collect_finished_jobs() -> void:
 # the triangles between them.
 func _build_chunk(key: Vector3i) -> Dictionary:
 	var step := key.z
+	@warning_ignore("integer_division")
 	var cells := chunk_size / step
 	var n := cells + 1
 	var half := size / 2.0

@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shaders/terrain.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/dirt_color = Color(0.55, 0.64, 0.3, 1)
+shader_parameter/dry_color = Color(0.8, 0.7, 0.4, 1)
+shader_parameter/mud_color = Color(0.45, 0.31, 0.2, 1)
+shader_parameter/rock_color = Color(0.64, 0.58, 0.54, 1)
+shader_parameter/facet_variation = 0.08
+shader_parameter/dry_patch_size = 40.0
+shader_parameter/mud_roughness = 0.55

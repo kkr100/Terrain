@@ -3,15 +3,18 @@ extends Node
 ## The game rules: count down, then drive through every checkpoint in order,
 ## as fast as you can.
 ##
-## The checkpoints are the children of the "Checkpoints" node in main.tscn.
-## Their order in the Scene panel is the order you drive them in, and the last
-## one is the finish. Drag them around in the editor to make a new route. You
+## The checkpoints are the children of the "Checkpoints" node in each level
+## scene (scenes/levels/). Their order in the Scene panel is the order you
+## drive them in, and the last one is the finish. Drag them around in the editor to make a new route. You
 ## only need to set X and Z: when the game starts, each one is moved down (or
 ## up) onto the ground.
 
 ## Sent when the car reaches the finish.
 signal finished(time: float, best_time: float, is_new_best: bool)
 
+## Which level this is (an id from LevelChoice.LEVELS), so the best time is
+## saved for the right level.
+@export var level_id := "green_valley"
 ## The car. CarSpawner fills this in when the race starts.
 @export var car: Car
 @export var terrain: Terrain
@@ -56,6 +59,11 @@ func _process(delta: float) -> void:
 	elapsed += delta
 
 
+## This level's entry from LevelChoice.LEVELS (its name, scene, ...).
+func level() -> Dictionary:
+	return LevelChoice.LEVELS[LevelChoice.index_of(level_id)]
+
+
 ## How far the car is from the next checkpoint, in metres (ignoring height).
 func distance_to_next() -> float:
 	if next_index >= checkpoints.size():
@@ -83,13 +91,13 @@ func _finish() -> void:
 	is_finished = true
 	car.controls_enabled = false
 	_update_checkpoints()
-	# Each car has its own best time, since some cars are much faster.
+	# Each level has a best time for each car, since some cars are much faster.
 	var car_id: String = CarChoice.selected().id
-	var best := BestTime.read(car_id)
+	var best := BestTime.read(level_id, car_id)
 	var is_new_best := best < 0.0 or elapsed < best
 	if is_new_best:
 		best = elapsed
-		BestTime.write(car_id, best)
+		BestTime.write(level_id, car_id, best)
 	finished.emit(elapsed, best, is_new_best)
 
 

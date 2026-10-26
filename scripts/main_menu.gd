@@ -1,6 +1,6 @@
 extends Control
 ## The first screen you see: pick a mode (which then takes you to the
-## car-select screen), or quit.
+## level-select or car-select screen), or quit.
 
 @onready var _race_button: Button = $Center/Box/RaceButton
 @onready var _explore_button: Button = $Center/Box/ExploreButton
@@ -18,9 +18,13 @@ func _ready() -> void:
 		button.mouse_entered.connect(button.grab_focus)
 
 	var car: Dictionary = CarChoice.selected()
-	var best := BestTime.read(car.id)
+	var level: Dictionary = LevelChoice.selected()
+	var best := BestTime.read(level.id, car.id)
 	var lines := []
-	lines.append("Best time (%s): %s" % [car.name, BestTime.format(best)] if best >= 0.0 else "No best time yet")
+	if best >= 0.0:
+		lines.append("Best time (%s, %s): %s" % [level.name, car.name, BestTime.format(best)])
+	else:
+		lines.append("No best time yet")
 	var total := Exploration.total_count()
 	if total > 0:
 		lines.append("Places found: %d / %d" % [Exploration.load_found().size(), total])
@@ -42,5 +46,7 @@ func _show_mode_info(button: Button) -> void:
 
 func _on_mode_pressed(id: String) -> void:
 	GameMode.select(id)
-	# Swap this whole menu scene for the car-select screen.
-	get_tree().change_scene_to_file("res://scenes/car_select.tscn")
+	# Swap this whole menu scene for the mode's first screen.
+	for mode in GameMode.MODES:
+		if mode.id == id:
+			get_tree().change_scene_to_file(mode.first_screen)

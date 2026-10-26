@@ -1,0 +1,98 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/race_base.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/surface_type.gd" id="4_surface"]
+[ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="Material" path="res://materials/terrain_marsh.tres" id="3_ground"]
+
+[sub_resource type="Resource" id="SurfaceType_deep_mud"]
+script = ExtResource("4_surface")
+display_name = "Deep mud"
+grip = 0.35
+drag = 0.6
+color = Color(0.36, 0.26, 0.18, 1)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.45, 0.55, 0.66, 1)
+sky_horizon_color = Color(0.74, 0.78, 0.8, 1)
+ground_bottom_color = Color(0.3, 0.38, 0.28, 1)
+ground_horizon_color = Color(0.74, 0.78, 0.8, 1)
+sun_angle_max = 25.0
+
+[sub_resource type="Sky" id="Sky_level"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_level"]
+background_mode = 2
+sky = SubResource("Sky_level")
+tonemap_mode = 1
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_intensity = 1.5
+fog_enabled = true
+fog_sky_affect = 0.0
+adjustment_enabled = true
+fog_light_color = Color(0.74, 0.78, 0.8, 1)
+fog_density = 0.0045
+adjustment_saturation = 0.95
+
+[node name="MudMarsh" instance=ExtResource("1_base")]
+
+[node name="WorldEnvironment" parent="." index="0"]
+environment = SubResource("Environment_level")
+
+[node name="Sun" parent="." index="1"]
+transform = Transform3D(0.866025, -0.321394, 0.383022, 0, 0.766044, 0.642788, -0.5, -0.55667, 0.663414, 0, 10, 0)
+light_color = Color(0.9, 0.93, 1, 1)
+light_energy = 0.8
+
+[node name="Terrain" parent="." index="2"]
+map_seed = 21
+hill_height = 14.0
+hill_frequency = 0.005
+mud_amount = -0.05
+mud = SubResource("SurfaceType_deep_mud")
+ground_material = ExtResource("3_ground")
+
+[node name="Nature" parent="." index="3"]
+tree_count = 260
+rock_count = 80
+boulder_count = 10
+bush_count = 1100
+nature_seed = 8
+
+[node name="Race" parent="." index="7"]
+level_id = "mud_marsh"
+
+[node name="Checkpoint1" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 0, 90)
+
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 0, 70)
+
+[node name="Checkpoint4" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 0, 20)
+
+[node name="Checkpoint5" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 0, -30)
+
+[node name="Checkpoint6" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, -90)
+
+[node name="Checkpoint7" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -60)
+
+[node name="Checkpoint8" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, -95)
+
+[node name="Checkpoint9" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0, -60)
+
+[node name="Checkpoint10" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 0)
+
+[node name="Finish" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 90)

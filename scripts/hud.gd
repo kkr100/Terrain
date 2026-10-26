@@ -17,6 +17,7 @@ const CONTROLS := "W / Up: drive   S / Down: brake, reverse   A D / Left Right: 
 @onready var _finish_screen: Control = $FinishScreen
 @onready var _result_label: Label = $FinishScreen/Panel/Box/ResultLabel
 @onready var _restart_button: Button = $FinishScreen/Panel/Box/RestartButton
+@onready var _next_button: Button = $FinishScreen/Panel/Box/NextButton
 @onready var _menu_button: Button = $FinishScreen/Panel/Box/MenuButton
 
 
@@ -24,6 +25,7 @@ func _ready() -> void:
 	_finish_screen.hide()
 	race.finished.connect(_on_race_finished)
 	_restart_button.pressed.connect(_on_restart_pressed)
+	_next_button.pressed.connect(_on_next_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 
 
@@ -35,13 +37,15 @@ func _process(_delta: float) -> void:
 			roundi(car.rpm / 100.0) * 100, ground, CONTROLS]
 
 	var total := race.checkpoints.size()
+	var text: String = race.level().name + "\n"
 	if race.is_finished:
-		_race_label.text = "Finished!"
+		text += "Finished!"
 	elif race.next_index == total - 1:
-		_race_label.text = "Finish line   %d m\n%s" % [roundi(race.distance_to_next()), BestTime.format(race.elapsed)]
+		text += "Finish line   %d m\n%s" % [roundi(race.distance_to_next()), BestTime.format(race.elapsed)]
 	else:
-		_race_label.text = "Checkpoint %d / %d   %d m\n%s" % [race.next_index + 1, total - 1,
+		text += "Checkpoint %d / %d   %d m\n%s" % [race.next_index + 1, total - 1,
 				roundi(race.distance_to_next()), BestTime.format(race.elapsed)]
+	_race_label.text = text
 
 	# Show "3", "2", "1", then "GO!" for one second after the start.
 	if race.countdown > 0.0:
@@ -59,6 +63,11 @@ func _on_race_finished(time: float, best_time: float, is_new_best: bool) -> void
 	else:
 		text += "Best time: %s" % BestTime.format(best_time)
 	_result_label.text = text
+	# Offer the next level, unless this was the last one.
+	var next := LevelChoice.index_of(race.level_id) + 1
+	_next_button.visible = next < LevelChoice.LEVELS.size()
+	if _next_button.visible:
+		_next_button.text = "Next level: %s" % LevelChoice.LEVELS[next].name
 	_finish_screen.show()
 	# Focus the button so Enter or a gamepad can press it without the mouse.
 	_restart_button.grab_focus()
@@ -66,6 +75,12 @@ func _on_race_finished(time: float, best_time: float, is_new_best: bool) -> void
 
 func _on_restart_pressed() -> void:
 	get_tree().reload_current_scene()
+
+
+func _on_next_pressed() -> void:
+	var next := LevelChoice.index_of(race.level_id) + 1
+	LevelChoice.select(next)
+	get_tree().change_scene_to_file(LevelChoice.LEVELS[next].scene)
 
 
 func _on_menu_pressed() -> void:

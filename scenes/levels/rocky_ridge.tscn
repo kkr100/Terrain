@@ -1,0 +1,94 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/race_base.tscn" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="Material" path="res://materials/terrain_ridge.tres" id="3_ground"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.24, 0.32, 0.62, 1)
+sky_horizon_color = Color(0.98, 0.68, 0.45, 1)
+ground_bottom_color = Color(0.32, 0.3, 0.28, 1)
+ground_horizon_color = Color(0.98, 0.68, 0.45, 1)
+sun_angle_max = 15.0
+sun_curve = 0.1
+
+[sub_resource type="Sky" id="Sky_level"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_level"]
+background_mode = 2
+sky = SubResource("Sky_level")
+tonemap_mode = 1
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_intensity = 1.5
+fog_enabled = true
+fog_sky_affect = 0.0
+adjustment_enabled = true
+fog_light_color = Color(0.95, 0.72, 0.55, 1)
+fog_density = 0.0022
+adjustment_saturation = 1.2
+
+[node name="RockyRidge" instance=ExtResource("1_base")]
+
+[node name="WorldEnvironment" parent="." index="0"]
+environment = SubResource("Environment_level")
+
+[node name="Sun" parent="." index="1"]
+transform = Transform3D(-0.5, 0.209511, -0.840301, 0, 0.970296, 0.241922, 0.866025, 0.120961, -0.485148, 0, 10, 0)
+light_color = Color(1, 0.72, 0.48, 1)
+light_energy = 1.3
+
+[node name="Terrain" parent="." index="2"]
+map_seed = 42
+hill_height = 42.0
+hill_frequency = 0.0065
+mud_amount = 0.6
+rock_slope_degrees = 24.0
+ground_material = ExtResource("3_ground")
+
+[node name="Nature" parent="." index="3"]
+tree_count = 300
+rock_count = 200
+boulder_count = 35
+bush_count = 500
+nature_seed = 5
+
+[node name="Race" parent="." index="7"]
+level_id = "rocky_ridge"
+
+[node name="Checkpoint1" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 0, 47)
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 0, 10)
+
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 76, 0, -31)
+
+[node name="Checkpoint4" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 0, -60)
+
+[node name="Checkpoint5" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -74)
+
+[node name="Checkpoint6" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66, 0, -78)
+
+[node name="Checkpoint7" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -87, 0, -22)
+
+[node name="Checkpoint8" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -86, 0, 28)
+
+[node name="Checkpoint9" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0, 90)
+
+[node name="Checkpoint10" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 85)
+
+[node name="Checkpoint11" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 72)
+
+[node name="Finish" parent="Checkpoints" instance=ExtResource("2_checkpoint")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 0, 46)

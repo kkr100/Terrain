@@ -1,0 +1,69 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/nitro_flames.gd" id="1_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
+albedo_color = Color(0.55, 0.55, 0.6, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
+material = SubResource("StandardMaterial3D_pipe")
+top_radius = 0.06
+bottom_radius = 0.06
+height = 0.3
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_outer"]
+shading_mode = 0
+albedo_color = Color(0.25, 0.55, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_outer"]
+material = SubResource("StandardMaterial3D_outer")
+top_radius = 0.0
+bottom_radius = 0.1
+height = 0.8
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_inner"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.95, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_inner"]
+material = SubResource("StandardMaterial3D_inner")
+top_radius = 0.0
+bottom_radius = 0.06
+height = 0.45
+radial_segments = 8
+rings = 1
+
+[node name="NitroFlames" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="PipeLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.3, 0, 0)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="PipeRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.3, 0, 0)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="Flames" type="Node3D" parent="."]
+
+[node name="OuterLeft" type="MeshInstance3D" parent="Flames"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.3, 0, -0.55)
+mesh = SubResource("CylinderMesh_outer")
+
+[node name="InnerLeft" type="MeshInstance3D" parent="Flames"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.3, 0, -0.37)
+mesh = SubResource("CylinderMesh_inner")
+
+[node name="OuterRight" type="MeshInstance3D" parent="Flames"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.3, 0, -0.55)
+mesh = SubResource("CylinderMesh_outer")
+
+[node name="InnerRight" type="MeshInstance3D" parent="Flames"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.3, 0, -0.37)
+mesh = SubResource("CylinderMesh_inner")

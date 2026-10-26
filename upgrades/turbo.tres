@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "turbo"
+display_name = "Turbocharger"
+slot = "Engine"
+description = "Squeezes more air into the engine: 25% more power and 15 km/h more top speed."
+unlocked_by = "supply_cache"
+stat_bonus = {
+"Top speed": 1,
+"Acceleration": 1
+}
+power_scale = 1.25
+top_speed_add = 15.0

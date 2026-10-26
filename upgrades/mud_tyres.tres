@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "mud_tyres"
+display_name = "Mud tyres"
+slot = "Tyres"
+description = "Big, chunky tyres with deep tread. They chew through mud, but slide a little more on hard ground."
+unlocked_by = "pond"
+stat_bonus = {
+"Mud": 2
+}
+grip_scale = 0.95
+mud_grip_scale = 1.6
+mud_drag_scale = 0.5
+tire_size_scale = 1.12

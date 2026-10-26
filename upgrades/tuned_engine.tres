@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "tuned_engine"
+display_name = "Tuned engine"
+slot = "Engine"
+description = "A mechanic camping out here left their tools behind. A careful tune-up gives 15% more power."
+unlocked_by = "campsite"
+stat_bonus = {
+"Acceleration": 1
+}
+power_scale = 1.15

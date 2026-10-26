@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/upgrade_parts/rally_wing.tscn" id="2_part"]
+
+[resource]
+script = ExtResource("1_script")
+id = "rally_wing"
+display_name = "Rally wing"
+slot = "Body"
+description = "A big wing on the back pushes the car onto the ground at speed, for more grip in fast turns."
+unlocked_by = "obelisk"
+stat_bonus = {
+"Handling": 1
+}
+downforce = 0.35
+part_scene = ExtResource("2_part")
+part_mount = "Rear"

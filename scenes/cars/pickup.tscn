@@ -98,3 +98,14 @@ sharpness = 12.0
 rumble = 0.45
 hiss = 0.1
 brightness_hz = 1400.0
+
+[node name="Mounts" type="Node3D" parent="."]
+
+[node name="Roof" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, 0.45)
+
+[node name="Rear" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -2.0)
+
+[node name="Exhaust" type="Marker3D" parent="Mounts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2.2)

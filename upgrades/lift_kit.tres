@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/upgrade_parts/light_bar.tscn" id="2_part"]
+
+[resource]
+script = ExtResource("1_script")
+id = "lift_kit"
+display_name = "Lift kit"
+slot = "Suspension"
+description = "Lifts the car 20 cm with long, soft springs to float over rocks and bumps. Comes with a roof light bar!"
+unlocked_by = "lookout"
+stat_bonus = {
+"Mud": 1
+}
+ride_height_add = 0.2
+travel_scale = 1.4
+stiffness_scale = 0.85
+part_scene = ExtResource("2_part")
+part_mount = "Roof"

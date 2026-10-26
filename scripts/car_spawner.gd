@@ -17,8 +17,12 @@ var car: Car
 
 
 func _ready() -> void:
-	var scene: PackedScene = load(CarChoice.selected().scene)
+	var choice := CarChoice.selected()
+	var scene: PackedScene = load(choice.scene)
 	car = scene.instantiate()
+	# The upgrades you fitted on the car-select screen. This has to happen
+	# before add_child, because the car uses them in its _ready.
+	car.upgrades = Upgrades.fitted(choice.id)
 	# The car becomes our child, so it starts exactly where this marker is.
 	add_child(car)
 	camera.target = car

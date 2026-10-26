@@ -1,0 +1,57 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dark"]
+albedo_color = Color(0.16, 0.16, 0.18, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
+albedo_color = Color(1, 0.95, 0.75, 1)
+emission_enabled = true
+emission = Color(1, 0.92, 0.65, 1)
+emission_energy_multiplier = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_bar"]
+material = SubResource("StandardMaterial3D_dark")
+size = Vector3(1.1, 0.1, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_foot"]
+material = SubResource("StandardMaterial3D_dark")
+size = Vector3(0.06, 0.12, 0.08)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lamp"]
+material = SubResource("StandardMaterial3D_lamp")
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.06
+radial_segments = 8
+rings = 1
+
+[node name="LightBar" type="Node3D"]
+
+[node name="FootLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.06, 0)
+mesh = SubResource("BoxMesh_foot")
+
+[node name="FootRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 0.06, 0)
+mesh = SubResource("BoxMesh_foot")
+
+[node name="Bar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.16, 0)
+mesh = SubResource("BoxMesh_bar")
+
+[node name="Lamp1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.39, 0.16, 0.07)
+mesh = SubResource("CylinderMesh_lamp")
+
+[node name="Lamp2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, -0.13, 0.16, 0.07)
+mesh = SubResource("CylinderMesh_lamp")
+
+[node name="Lamp3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.13, 0.16, 0.07)
+mesh = SubResource("CylinderMesh_lamp")
+
+[node name="Lamp4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.39, 0.16, 0.07)
+mesh = SubResource("CylinderMesh_lamp")

@@ -27,7 +27,8 @@ func _ready() -> void:
 		lines.append("No best time yet")
 	var total := Exploration.total_count()
 	if total > 0:
-		lines.append("Places found: %d / %d" % [Exploration.load_found().size(), total])
+		lines.append("Places found: %d / %d   Upgrades unlocked: %d / %d" % [Exploration.load_found().size(),
+				total, Upgrades.unlocked_count(), Upgrades.PATHS.size()])
 	_best_label.text = "\n".join(lines)
 
 	# Focus the mode you played last time, so you can just press Enter.

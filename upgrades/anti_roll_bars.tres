@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CarUpgrade" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_upgrade.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "anti_roll_bars"
+display_name = "Anti-roll bars"
+slot = "Suspension"
+description = "Steel bars that stop the car leaning over, so it's much harder to roll in sharp turns."
+unlocked_by = "ancient_oak"
+stat_bonus = {
+"Handling": 1
+}
+roll_scale = 0.35

@@ -59,11 +59,32 @@ put back at the last checkpoint you passed.
 | **Shift** | Nitro boost (once you've fitted the Nitro upgrade) |
 | **M** | Open or close the map (Explore mode) |
 | **Esc** or **P** | Pause (and unpause) |
+| **`** (left of 1) or **F1** | Open or close the hidden dev console (see below) |
 
 The map is surrounded by steep rock walls. If the car ever falls through the
 world, it's put back at the start.
 The keys live in **Project > Project Settings > Input Map**, so you can change
 them there without touching any code.
+
+### The dev console
+
+For testing there's a hidden console. Press the key just left of **1**
+(that's **`** on most keyboards and **§** on Swedish and other Nordic ones),
+or **F1**, on any screen. The game freezes while it's open. Type a command and
+press **Enter**:
+
+| Command | What it does |
+| --- | --- |
+| `help` | Lists the commands. |
+| `unlock_all` | Unlocks all 12 upgrades, so you can fit them on the car-select screen without exploring. |
+| `relock` | Undoes `unlock_all`. Upgrades from places you really found stay unlocked. |
+| `upgrades` | Lists every upgrade and whether it's unlocked. |
+| `clear` | Empties the console. |
+
+**↑** and **↓** bring back commands you typed before, and **Esc** closes it.
+`unlock_all` doesn't pretend you found any places: it's a separate switch
+(`unlock_all` in the `[dev]` section of `user://save.cfg`), so your Explore
+progress stays as it was.
 
 The first time you open the project Godot takes a moment to "import" it. It
 creates a hidden `.godot/` folder as a cache. That folder is ignored by git,
@@ -114,6 +135,7 @@ so you never need to commit it.
 | `scripts/explore_hud.gd` | Explore mode's HUD: speed, places found, the "Discovered!" and "Upgrade unlocked!" messages. |
 | `scripts/compass.gd` | The compass strip at the top of the screen in Explore mode. |
 | `scripts/explore_map.gd` | The map screen (M) in Explore mode. |
+| `scripts/dev_console.gd` | The hidden dev console (the **`** key). It's an autoload, so it's on every screen. |
 | `scripts/pause_menu.gd` | Pauses the game and makes the pause menu's buttons work. |
 | `scripts/terrain.gd` | Builds the hills, paints the dirt, mud and rock, and tells the car which surface is under a wheel. |
 | `scripts/surface_type.gd` | Describes one kind of ground: its name, grip, drag and colour. |

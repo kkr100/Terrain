@@ -17,6 +17,19 @@ func _ready() -> void:
 		button.focus_entered.connect(_show_mode_info.bind(button))
 		button.mouse_entered.connect(button.grab_focus)
 
+	_show_progress()
+	# The dev console (the ` key) can unlock upgrades while you're here.
+	DevConsole.unlocks_changed.connect(_show_progress)
+
+	# Focus the mode you played last time, so you can just press Enter.
+	if GameMode.selected().id == "explore":
+		_explore_button.grab_focus()
+	else:
+		_race_button.grab_focus()
+
+
+## Your best time, and how many places and upgrades you've found.
+func _show_progress() -> void:
 	var car: Dictionary = CarChoice.selected()
 	var level: Dictionary = LevelChoice.selected()
 	var best := BestTime.read(level.id, car.id)
@@ -30,12 +43,6 @@ func _ready() -> void:
 		lines.append("Places found: %d / %d   Upgrades unlocked: %d / %d" % [Exploration.load_found().size(),
 				total, Upgrades.unlocked_count(), Upgrades.PATHS.size()])
 	_best_label.text = "\n".join(lines)
-
-	# Focus the mode you played last time, so you can just press Enter.
-	if GameMode.selected().id == "explore":
-		_explore_button.grab_focus()
-	else:
-		_race_button.grab_focus()
 
 
 func _show_mode_info(button: Button) -> void:

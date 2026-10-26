@@ -71,8 +71,10 @@ func _input(event: InputEvent) -> void:
 		_change_level(1)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
-		_on_back_pressed()
+		# Mark the key as used first: going back removes this screen from the
+		# tree right away, and then get_viewport() would be null.
 		get_viewport().set_input_as_handled()
+		_on_back_pressed()
 
 
 func _change_level(step: int) -> void:

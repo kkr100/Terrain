@@ -1,0 +1,102 @@
+[gd_resource type="Resource" script_class="ExploreMapData" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/explore_map_data.gd" id="1_data"]
+[ext_resource type="Script" path="res://scripts/surface_type.gd" id="2_surface"]
+[ext_resource type="Image" path="res://assets/maps/tassili/terrain.png" id="3_terrain"]
+[ext_resource type="Image" path="res://assets/maps/tassili/poster.jpg" id="4_poster"]
+
+[sub_resource type="Resource" id="Surface_grass"]
+script = ExtResource("2_surface")
+display_name = "Scrub"
+grip = 0.95
+drag = 0.02
+color = Color(0.600, 0.620, 0.340, 1)
+
+[sub_resource type="Resource" id="Surface_meadow"]
+script = ExtResource("2_surface")
+display_name = "Gravel"
+grip = 0.9
+drag = 0.02
+color = Color(0.800, 0.660, 0.480, 1)
+
+[sub_resource type="Resource" id="Surface_sand"]
+script = ExtResource("2_surface")
+display_name = "Sand"
+grip = 0.75
+drag = 0.12
+color = Color(0.900, 0.750, 0.500, 1)
+
+[sub_resource type="Resource" id="Surface_rock"]
+script = ExtResource("2_surface")
+display_name = "Sandstone"
+grip = 1.4
+drag = 0.0
+color = Color(0.720, 0.450, 0.320, 1)
+
+[sub_resource type="Resource" id="Surface_snow"]
+script = ExtResource("2_surface")
+display_name = "Sandstone"
+grip = 1.4
+drag = 0.0
+color = Color(0.720, 0.450, 0.320, 1)
+
+[sub_resource type="Resource" id="Surface_mud"]
+script = ExtResource("2_surface")
+display_name = "Mud"
+grip = 0.45
+drag = 0.35
+color = Color(0.500, 0.370, 0.250, 1)
+
+[sub_resource type="Resource" id="Surface_track"]
+script = ExtResource("2_surface")
+display_name = "Track"
+grip = 1.1
+drag = 0.0
+color = Color(0.660, 0.500, 0.360, 1)
+
+[sub_resource type="Resource" id="Surface_lakebed"]
+script = ExtResource("2_surface")
+display_name = "Water"
+grip = 0.5
+drag = 0.9
+color = Color(0.550, 0.450, 0.300, 1)
+
+[resource]
+script = ExtResource("1_data")
+id = "tassili"
+display_name = "Tassili n'Ajjer"
+region = "Algeria"
+description = "A Saharan plateau of sandstone tables and sand valleys, with a few hidden pools."
+terrain_image = ExtResource("3_terrain")
+poster = ExtResource("4_poster")
+lowest = -4.0000
+highest = 127.0000
+start = Vector2(1.2, 3.8)
+places = PackedVector2Array(121.2, 781.2, 961.2, 701.2, 931.2, -358.8, -988.8, -68.8, 371.2, -868.8, -428.8, -628.8, -968.8, 961.2, -528.8, 481.2, -1068.8, -748.8, 1071.2, -988.8, 561.2, 241.2, -388.8, 1071.2)
+bumps = 0.8
+meadow_line = 0.05
+rock_line = 0.35
+snow_line = 2.0
+mud_amount = 1.0
+grass = SubResource("Surface_grass")
+meadow = SubResource("Surface_meadow")
+sand = SubResource("Surface_sand")
+rock = SubResource("Surface_rock")
+snow = SubResource("Surface_snow")
+mud = SubResource("Surface_mud")
+track = SubResource("Surface_track")
+lakebed = SubResource("Surface_lakebed")
+trees = "palms"
+trees_in_forest = 0.6
+trees_in_open = 0.0
+trees_on_sand = 0.004
+trees_by_water = 0.5
+tree_count = 160
+rock_count = 110
+boulder_count = 30
+fog_density = 0.0008
+sky_top = Color(0.300, 0.520, 0.860, 1)
+sky_horizon = Color(0.930, 0.840, 0.700, 1)
+sky_ground = Color(0.720, 0.580, 0.400, 1)
+fog = Color(0.930, 0.840, 0.700, 1)
+water_color = Color(0.200, 0.550, 0.600, 1)

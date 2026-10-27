@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://cjtsc5icrehjb"
+path="res://.godot/imported/terrain.png-c1ec2adf1fc0da06b68027fdf31eded1.image"
+
+[deps]
+
+source_file="res://assets/maps/gimli_ridge/terrain.png"
+dest_files=["res://.godot/imported/terrain.png-c1ec2adf1fc0da06b68027fdf31eded1.image"]
+
+[params]
+

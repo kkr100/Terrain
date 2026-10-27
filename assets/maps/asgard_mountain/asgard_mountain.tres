@@ -1,0 +1,102 @@
+[gd_resource type="Resource" script_class="ExploreMapData" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/explore_map_data.gd" id="1_data"]
+[ext_resource type="Script" path="res://scripts/surface_type.gd" id="2_surface"]
+[ext_resource type="Image" path="res://assets/maps/asgard_mountain/terrain.png" id="3_terrain"]
+[ext_resource type="Image" path="res://assets/maps/asgard_mountain/poster.jpg" id="4_poster"]
+
+[sub_resource type="Resource" id="Surface_grass"]
+script = ExtResource("2_surface")
+display_name = "Grass"
+grip = 1.0
+drag = 0.0
+color = Color(0.360, 0.600, 0.270, 1)
+
+[sub_resource type="Resource" id="Surface_meadow"]
+script = ExtResource("2_surface")
+display_name = "Meadow"
+grip = 1.0
+drag = 0.0
+color = Color(0.620, 0.700, 0.360, 1)
+
+[sub_resource type="Resource" id="Surface_sand"]
+script = ExtResource("2_surface")
+display_name = "Gravel"
+grip = 0.9
+drag = 0.05
+color = Color(0.740, 0.680, 0.550, 1)
+
+[sub_resource type="Resource" id="Surface_rock"]
+script = ExtResource("2_surface")
+display_name = "Rock"
+grip = 1.4
+drag = 0.0
+color = Color(0.600, 0.600, 0.620, 1)
+
+[sub_resource type="Resource" id="Surface_snow"]
+script = ExtResource("2_surface")
+display_name = "Snow"
+grip = 0.6
+drag = 0.1
+color = Color(0.930, 0.950, 0.980, 1)
+
+[sub_resource type="Resource" id="Surface_mud"]
+script = ExtResource("2_surface")
+display_name = "Mud"
+grip = 0.45
+drag = 0.35
+color = Color(0.450, 0.310, 0.200, 1)
+
+[sub_resource type="Resource" id="Surface_track"]
+script = ExtResource("2_surface")
+display_name = "Trail"
+grip = 1.1
+drag = 0.0
+color = Color(0.620, 0.480, 0.320, 1)
+
+[sub_resource type="Resource" id="Surface_lakebed"]
+script = ExtResource("2_surface")
+display_name = "Water"
+grip = 0.5
+drag = 0.9
+color = Color(0.500, 0.450, 0.350, 1)
+
+[resource]
+script = ExtResource("1_data")
+id = "asgard_mountain"
+display_name = "Asgard Mountain"
+region = "The Valhallas"
+description = "High rocky country with a ring of trails around Asgard Mountain and lakes in the hollows."
+terrain_image = ExtResource("3_terrain")
+poster = ExtResource("4_poster")
+lowest = -4.0000
+highest = 298.7161
+start = Vector2(41.2, 326.2)
+places = PackedVector2Array(251.2, -718.8, -368.8, 841.2, 751.2, -238.8, -658.8, -508.8, -1008.8, 901.2, 841.2, 351.2, 971.2, -798.8, -748.8, 571.2, 151.2, 971.2, -618.8, -1038.8, 401.2, 161.2, 461.2, 541.2)
+bumps = 1.2
+meadow_line = 0.3
+rock_line = 0.8
+snow_line = 0.82
+mud_amount = 0.55
+grass = SubResource("Surface_grass")
+meadow = SubResource("Surface_meadow")
+sand = SubResource("Surface_sand")
+rock = SubResource("Surface_rock")
+snow = SubResource("Surface_snow")
+mud = SubResource("Surface_mud")
+track = SubResource("Surface_track")
+lakebed = SubResource("Surface_lakebed")
+trees = "pines"
+trees_in_forest = 0.9
+trees_in_open = 0.03
+trees_on_sand = 0.0
+trees_by_water = 0.0
+tree_count = 500
+rock_count = 90
+boulder_count = 16
+fog_density = 0.0009
+sky_top = Color(0.220, 0.460, 0.850, 1)
+sky_horizon = Color(0.680, 0.800, 0.930, 1)
+sky_ground = Color(0.350, 0.500, 0.300, 1)
+fog = Color(0.720, 0.820, 0.930, 1)
+water_color = Color(0.200, 0.500, 0.620, 1)

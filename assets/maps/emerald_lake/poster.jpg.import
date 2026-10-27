@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://dknx82ayttn3p"
+path="res://.godot/imported/poster.jpg-e674b954b3120b85283f80d9611afb3f.image"
+
+[deps]
+
+source_file="res://assets/maps/emerald_lake/poster.jpg"
+dest_files=["res://.godot/imported/poster.jpg-e674b954b3120b85283f80d9611afb3f.image"]
+
+[params]
+

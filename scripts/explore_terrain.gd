@@ -82,6 +82,7 @@ extends StaticBody3D
 
 # The numbers we use for each surface (same as in terrain.gd).
 enum { DIRT, MUD, ROCK }
+const SURFACE_COLORS := [Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1)]
 
 var _mountain_noise := FastNoiseLite.new()
 var _hill_noise := FastNoiseLite.new()
@@ -310,6 +311,17 @@ func make_map_image(pixels: int) -> Image:
 	return image
 
 
+# The material for the ground's meshes.
+func _chunk_material() -> Material:
+	return ground_material
+
+
+# The colour a surface gets in the mesh. The shader reads it as "how much of
+# each surface": pure red is dirt, green is mud, blue is rock.
+func _surface_color(surface_id: int) -> Color:
+	return SURFACE_COLORS[surface_id]
+
+
 func _surface(display_name: String, grip: float, drag: float) -> SurfaceType:
 	var surface := SurfaceType.new()
 	surface.display_name = display_name
@@ -435,7 +447,6 @@ func _build_chunk(key: Vector3i) -> Dictionary:
 	var colors := PackedColorArray()
 	vertices.resize(n * n)
 	colors.resize(n * n)
-	var pure := [Color(1, 0, 0), Color(0, 1, 0), Color(0, 0, 1)]
 	for j in n:
 		for i in n:
 			var x := x0 + i * step
@@ -448,7 +459,7 @@ func _build_chunk(key: Vector3i) -> Dictionary:
 			var height_z := heights[index + n] if step == 1 and j < n - 1 else height_at(x, z + 1.0)
 			# Vertices are relative to the chunk's centre (where its node is).
 			vertices[index] = Vector3(x, height, z) - centre
-			colors[index] = pure[_surface_id(x, z, height, height_x, height_z)]
+			colors[index] = _surface_color(_surface_id(x, z, height, height_x, height_z))
 
 	var indices := PackedInt32Array()
 	for j in cells:
@@ -520,7 +531,7 @@ func _add_chunk(data: Dictionary) -> void:
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	mesh.surface_set_material(0, ground_material)
+	mesh.surface_set_material(0, _chunk_material())
 
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.mesh = mesh

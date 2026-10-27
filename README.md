@@ -132,6 +132,8 @@ so you never need to commit it.
 | `scenes/level_select.tscn` | The level-select screen, with a map of each level and its route. |
 | `scenes/explore.tscn` | Explore mode: the big map, the points of interest, the camera and its HUD. |
 | `scenes/experimental.tscn` | The hidden Experimental mode: a copy of `explore.tscn` for testing new maps. |
+| `scenes/experimental_select.tscn` | Experimental mode's map picker. |
+| `assets/maps/` | Experimental mode's maps, made from map posters (see [Experimental mode](#experimental-mode-for-testing-new-maps)). |
 | `scenes/poi/` | The 12 points of interest, one small scene each. |
 | `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). Each level uses it 9 to 12 times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
@@ -160,6 +162,10 @@ so you never need to commit it.
 | `scripts/game_mode.gd` | The list of modes, and which one you picked. |
 | `scripts/explore_terrain.gd` | Builds the big Explore map in chunks, with less detail far away. |
 | `scripts/explore_nature.gd` | Trees, rocks and bushes on the big map, built around the car. |
+| `scripts/map_terrain.gd`, `scripts/map_nature.gd` | Experimental mode's ground and trees: the Explore ones, but shaped by a map poster. |
+| `scripts/explore_map_data.gd` | Describes one Experimental map: its heights, ground colours, trees and sky. |
+| `scripts/experimental_maps.gd`, `scripts/experimental_select.gd` | The list of Experimental maps, which one you picked, and the map picker. |
+| `scripts/experimental_map.gd` | Sets up Experimental mode for the map you picked. |
 | `scripts/nature_models.gd` | Shared helpers for loading and repainting Kenney's nature models. |
 | `scripts/point_of_interest.gd` | One place to discover: its name, description and how close you must get. |
 | `scripts/tint_model.gd` | Tints a model, for example to make a car look rusty. |
@@ -173,9 +179,11 @@ so you never need to commit it.
 | `scripts/surface_type.gd` | Describes one kind of ground: its name, grip, drag and colour. |
 | `scripts/nature.gd` | Scatters trees, rocks and bushes over the map, away from the start and the route. |
 | `shaders/terrain.gdshader` | Paints the terrain in a flat-shaded, low-poly cartoon style. |
+| `shaders/map_terrain.gdshader` | The same style for Experimental mode's maps, with a colour for each kind of ground. |
 | `materials/terrain.tres` | The terrain's material: the colours of dirt, mud and rock. |
 | `assets/models/` | Low-poly cars and nature models (CC0, from Kenney). |
 | `assets/CREDITS.md` | Where every model comes from, and its license. |
+| `tools/make_explore_maps.py` | Turns map posters (a PDF) into Experimental maps. |
 | `.gitignore` | Tells git to skip Godot's generated cache files. |
 | `.gitattributes` | Keeps line endings consistent across Windows, macOS and Linux. |
 
@@ -787,30 +795,89 @@ your best times and locks the upgrades again.
 
 ### Experimental mode, for testing new maps
 
-Experimental is a hidden copy of Explore where you can try out a new map
+Experimental is a hidden copy of Explore where you can try out new maps
 without breaking the real one. It has no button on the main menu: open the
-dev console (**`** or **F1**), type `dev` and press **Enter**. You land on
-the car-select screen, and **Drive!** takes you to `scenes/experimental.tscn`.
+dev console (**`** or **F1**), type `dev` and press **Enter**. First you pick
+a map, then a car, and **Drive!** takes you to `scenes/experimental.tscn`.
 
-At first `experimental.tscn` is an exact copy of `explore.tscn`, but they're
-two separate files, so change the copy as much as you like:
+#### The maps from the posters
 
-- Click the `Terrain` node and change its settings in the Inspector, like
-  `Map Seed` (a different number makes completely different hills),
-  `Mountain Height` or `Mud Amount`. Then click **Regenerate** to see it.
-- Click the `Nature` node to change how many trees, rocks and bushes grow.
-- Move, delete or add places under `PointsOfInterest`.
+Five of the maps are made from map posters of real places (a PDF of five
+topographic posters):
 
-Two settings keep it apart from your real game. On the `Exploration` node,
-`Save Section` is `experimental`, so the places you find are saved in their
-own `[experimental]` section of `user://save.cfg` and your Explore progress
-stays as it was. And `Unlocks Upgrades` is off, so finding places here
-doesn't unlock car upgrades. The upgrades you already unlocked in Explore
-still work here.
+| Map | Where | What it's like |
+| --- | --- | --- |
+| Tassili n'Ajjer | Algeria | Sahara desert: sandstone tables, sand valleys, a few pools with palms. |
+| Aurès Mountains | Algeria | Dry mountains around a long winding lake, sandy plains in the south-east. |
+| Emerald Lake | The Valhallas | A forest valley with two lakes, a river, lots of trails and a big lake. |
+| Gimli Ridge | The Valhallas | Lakes and islands below snowy ridges, with winding trails. |
+| Asgard Mountain | The Valhallas | High rocky country, with a ring of trails and lakes in the hollows. |
 
-When you like a test map, copy the settings over to `explore.tscn` (or make it
-a new mode in `scripts/game_mode.gd`). In Godot you can also press **F6** with
-`experimental.tscn` open to drive it straight away, skipping the menus.
+The sixth choice, **Explore copy**, is the old Experimental map: an exact copy
+of the Explore map.
+
+Each map is a folder in `assets/maps/`, made by `tools/make_explore_maps.py`
+from the PDF:
+
+- `terrain.png` is the map as data: one pixel every 2.5 m. Its red and green
+  together are the height, its blue is what the poster shows there (open
+  ground, sand, forest, water or a trail). It looks like a strange coloured
+  picture, but it isn't meant to be looked at!
+- `poster.jpg` is the poster itself. The map screen (**M**) shows it, with the
+  places on top.
+- `<name>.tres` is an `ExploreMapData` (`scripts/explore_map_data.gd`).
+  Double-click it to see its settings in the Inspector: where you start, where
+  the 12 places are, the colour, grip and drag of every kind of ground, how
+  many trees, and the colours of the sky.
+
+**How do you get heights out of a poster?** The posters have no height
+numbers, but they have contour lines: thin lines that each follow one height.
+Lines close together mean steep ground, far apart means flat. The tool finds
+the lines, says that all water is the lowest ground, and then works out the
+cheapest way to "walk" from the water to every pixel when each step costs as
+much as the ground is steep there. You can't get to the top of a mountain
+without climbing all its steep parts, so that cost is its height. It isn't
+exactly the real height (a lake high in the mountains ends up as low as the
+others), but the valleys, ridges and peaks are where the poster has them.
+
+In the game, `scripts/map_terrain.gd` (a `MapTerrain`, which "extends"
+`ExploreTerrain`, so it gets all its chunk tricks for free) reads the heights
+from `terrain.png` instead of noise, adds small bumps, and paints each kind of
+ground in its own colour (`shaders/map_terrain.gdshader`). The water is one
+flat sheet at height 0. `scripts/map_nature.gd` puts the trees in the
+poster's forests (or palms by the water in the desert), and
+`scripts/experimental_map.gd` sets everything up for the map you picked: it
+moves the places, picks the trees and changes the sky. If you drive into deep
+water, you're put back on land.
+
+To see a map in the editor: open `experimental.tscn`, click the `Terrain` node,
+drag a `.tres` from `assets/maps/` onto its `Map` setting and press
+**Regenerate**. (Clear `Map` again before you save, or leave it: the game sets
+it to the map you picked either way.)
+
+To make the maps again, for example after changing a colour or a height in the
+`STYLES` and `MAPS` lists at the top of the tool:
+
+```
+python3 tools/make_explore_maps.py path/to/Combined.pdf
+```
+
+It needs Python with numpy, scipy and Pillow, and `pdftoppm` (from Poppler).
+To add another map, add it to `MAPS` in the tool and its `.tres` to
+`scripts/experimental_maps.gd`.
+
+#### Keeping it apart from Explore
+
+Each map saves the places you find in its own section of `user://save.cfg`
+(`[experimental_tassili]`, `[experimental_aures]`, ...; the Explore copy uses
+`[experimental]`), so your Explore progress stays as it was. And on the
+`Exploration` node `Unlocks Upgrades` is off, so finding places here doesn't
+unlock car upgrades. The upgrades you already unlocked in Explore still work.
+
+When you like a test map, copy it over to `explore.tscn` (or make it a new
+mode in `scripts/game_mode.gd`). In Godot you can also press **F6** with
+`experimental.tscn` open to drive the map you picked last straight away,
+skipping the menus.
 
 ## Making a desktop build
 

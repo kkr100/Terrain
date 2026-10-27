@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://x6crju73kpsk"
+path="res://.godot/imported/terrain.png-a93ca60bffca8a1433fe008f101b538a.image"
+
+[deps]
+
+source_file="res://assets/maps/asgard_mountain/terrain.png"
+dest_files=["res://.godot/imported/terrain.png-a93ca60bffca8a1433fe008f101b538a.image"]
+
+[params]
+

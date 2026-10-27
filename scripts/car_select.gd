@@ -225,8 +225,11 @@ func _on_drive_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	# Back to the screen before this one.
-	if GameMode.selected().id == "point_to_point":
+	var mode := GameMode.selected()
+	if mode.id == "point_to_point":
 		get_tree().change_scene_to_file("res://scenes/level_select.tscn")
+	elif mode.id == "experimental":
+		get_tree().change_scene_to_file(mode.first_screen)
 	else:
 		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
@@ -236,4 +239,8 @@ func _title() -> String:
 	var mode := GameMode.selected()
 	if mode.id == "point_to_point":
 		return "%s, %s" % [mode.name, LevelChoice.selected().name]
+	if mode.id == "experimental":
+		var map := ExperimentalMaps.load_map(ExperimentalMaps.selected_index())
+		var map_name := map.display_name if map else ExperimentalMaps.EXPLORE_COPY_NAME
+		return "%s: %s" % [mode.name, map_name]
 	return mode.name

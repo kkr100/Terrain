@@ -29,6 +29,8 @@ Source: https://kenney.nl/assets/nature-kit (CC0, see `License.txt` there).
 | `stone_small*` | Rocks |
 | `stone_large*`, `stone_tall*` | Boulders |
 | `plant_bush*`, `grass_large` | Bushes and grass (decoration) |
+| `tree_pineSmall*` | Small pines on Experimental mode's Valhallas maps |
+| `tree_palm*`, `tree_plateau` | Palms and acacia-like trees on Experimental mode's desert maps |
 | `tent_*`, `campfire_*`, `log*`, `canoe`, `pot_large`, `sign`, `stump_old`, `lily_large`, `statue_*`, `platform_stone`, `mushroom_*` | Points of interest in Explore mode (`scenes/poi/`) |
 
 ## Survival (`models/kenney_survival/`, from Kenney's Survival Kit 2.0)
@@ -40,6 +42,14 @@ signposts, the fishing stand and more. They share `Textures/colormap.png`.
 
 The ground has no textures: `shaders/terrain.gdshader` paints it with plain
 colours.
+
+## Experimental maps (`maps/`)
+
+Made by `tools/make_explore_maps.py` from a PDF of five map posters that
+Kristoffer provided for this project (Tassili n'Ajjer and the Aurès Mountains
+in Algeria; Emerald Lake, Gimli Ridge and Asgard Mountain in the Valhallas).
+Each `poster.jpg` is the map part of one poster, made smaller; `terrain.png`
+is worked out from it.
 
 ## Engine sounds (`sounds/engines/`)
 

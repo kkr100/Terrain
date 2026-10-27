@@ -24,11 +24,12 @@ const MODES := [
 	{
 		# A hidden test copy of Explore, for trying out new maps. It has no
 		# button on the main menu: type "dev" in the dev console to open it.
-		# It saves the places you find in its own "experimental" section, so it
-		# never changes your Explore progress or unlocks upgrades.
+		# First you pick a map (see ExperimentalMaps). Each map saves the places
+		# you find in its own section, so it never changes your Explore
+		# progress or unlocks upgrades.
 		"id": "experimental",
 		"name": "Experimental",
-		"first_screen": "res://scenes/car_select.tscn",
+		"first_screen": "res://scenes/experimental_select.tscn",
 		"scene": "res://scenes/experimental.tscn",
 		"hidden": true,
 		"description": "A test copy of Explore for trying out new maps.",

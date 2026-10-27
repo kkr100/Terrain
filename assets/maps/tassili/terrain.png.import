@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://c1t1j3dyx01fr"
+path="res://.godot/imported/terrain.png-b403da5cd96f023d82416574b3b6724d.image"
+
+[deps]
+
+source_file="res://assets/maps/tassili/terrain.png"
+dest_files=["res://.godot/imported/terrain.png-b403da5cd96f023d82416574b3b6724d.image"]
+
+[params]
+

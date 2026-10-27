@@ -56,7 +56,7 @@ func _draw() -> void:
 		return
 	draw_texture_rect(_texture, rect, false)
 
-	var title := "Map   (M to close)"
+	var title := "Map   (%s to close)" % Controls.button("map")
 	draw_string_outline(font, rect.position + Vector2(10, 28), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 6, Color.BLACK)
 	draw_string(font, rect.position + Vector2(10, 28), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 22)
 

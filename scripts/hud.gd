@@ -7,8 +7,6 @@ extends CanvasLayer
 ## The race whose time and checkpoints we show.
 @export var race: Race
 
-const CONTROLS := "W / Up: drive   S / Down: brake, reverse   A D / Left Right: steer\nSpace: handbrake   R: flip the car back up   Esc or P: pause"
-
 # "@onready" fills these in just before _ready runs, when the child nodes exist.
 # "$Name" is short for get_node("Name").
 @onready var _speed_label: Label = $SpeedLabel
@@ -35,9 +33,10 @@ func _process(_delta: float) -> void:
 	var ground: String = car.surface_name if car.surface_name != "" else "In the air"
 	var nitro := ""
 	if car.boost_power > 0.0:
-		nitro = "   nitro %d%% (Shift)" % roundi(car.nitro * 100.0)
+		nitro = "   nitro %d%% (%s)" % [roundi(car.nitro * 100.0), Controls.button("boost")]
+	# Controls.hint() shows keys or controller buttons, whichever you used last.
 	_speed_label.text = "%d km/h   gear %d   %d rpm   %s%s\n%s" % [roundi(kmh), car.gear,
-			roundi(car.rpm / 100.0) * 100, ground, nitro, CONTROLS]
+			roundi(car.rpm / 100.0) * 100, ground, nitro, Controls.hint()]
 
 	var total := race.checkpoints.size()
 	var text: String = race.level().name + "\n"

@@ -49,6 +49,14 @@ put back at the last checkpoint you passed.
 
 ## Controls
 
+You can play with the keyboard or a game controller (Xbox, PlayStation 4/5,
+or most others that work on your computer). Just plug it in, or pair it over
+Bluetooth, before or while the game runs. The hints at the bottom of the
+screen switch to the controller's buttons as soon as you press one, and back
+to keys when you touch the keyboard.
+
+### Keyboard
+
 | Key | What it does |
 | --- | --- |
 | **W** or **↑** | Drive forward |
@@ -61,10 +69,31 @@ put back at the last checkpoint you passed.
 | **Esc** or **P** | Pause (and unpause) |
 | **`** (left of 1) or **F1** | Open or close the hidden dev console (see below) |
 
+### Controller
+
+| Xbox | PlayStation | What it does |
+| --- | --- | --- |
+| **RT** | **R2** | Drive forward. Squeeze it gently for less power. |
+| **LT** | **L2** | Brake. Once you've stopped, hold it to reverse. |
+| **Left stick** or **D-pad ← →** | **Left stick** or **D-pad ← →** | Steer (the stick steers gently or hard, depending on how far you push it) |
+| **Right stick** | **Right stick** | Look around the car |
+| **Click the right stick** | **R3** | Look behind you |
+| **A** | **Cross** | Handbrake |
+| **Y** | **Triangle** | Flip the car back onto its wheels |
+| **X** or **RB** | **Square** or **R1** | Nitro boost (once you've fitted the Nitro upgrade) |
+| **View** (the small left button) | **Create** | Open or close the map (Explore mode) |
+| **Menu** (the small right button) | **Options** | Pause (and unpause) |
+
+In the menus, move with the **left stick** or the **D-pad**, press **A** /
+**Cross** to choose, and **B** / **Circle** to go back (or to close the
+pause menu, the map, or an upgrade list). On the level- and car-select
+screens, left and right flip through the levels or cars, and up and down
+reach the upgrade slots. The dev console needs a keyboard.
+
 The map is surrounded by steep rock walls. If the car ever falls through the
 world, it's put back at the start.
-The keys live in **Project > Project Settings > Input Map**, so you can change
-them there without touching any code.
+The keys and controller buttons live in **Project > Project Settings > Input
+Map**, so you can change them there without touching any code.
 
 ### The dev console
 
@@ -108,7 +137,7 @@ so you never need to commit it.
 | `scenes/cars/rally.tscn`, `suv.tscn`, `pickup.tscn` | The three cars: model, wheels, suspension, engine sound, and the spots where upgrade parts go. |
 | `upgrades/` | The 12 car upgrades, one `.tres` file each. |
 | `scenes/upgrade_parts/` | The parts you can see on an upgraded car: the rally wing, the roof light bar and the nitro exhaust. |
-| `scripts/car.gd` | Used by all three cars. Reads the keyboard and tells the car to drive, brake and steer. |
+| `scripts/car.gd` | Used by all three cars. Reads the keyboard or controller and tells the car to drive, brake and steer. |
 | `scripts/engine_sound.gd` | Plays each car's engine noise from recorded loops, following the RPM. |
 | `scripts/car_choice.gd` | The list of cars (names, descriptions, stat bars) and which one you picked. |
 | `scripts/car_spawner.gd` | Puts the car you picked, with its upgrades, into the race. |
@@ -116,7 +145,8 @@ so you never need to commit it.
 | `scripts/upgrades.gd` | The list of upgrades, which ones you've unlocked, and which are fitted to each car. |
 | `scripts/nitro_flames.gd` | Shows the nitro flames while you boost. |
 | `scripts/car_select.gd` | Makes the car-select screen work, including fitting upgrades. |
-| `scripts/chase_camera.gd` | Makes the camera follow the car from behind. |
+| `scripts/chase_camera.gd` | Makes the camera follow the car from behind, and look around with the right stick. |
+| `scripts/controls.gd` | Knows whether you're using the keyboard or a controller (Xbox or PlayStation), so the HUD shows the right buttons. An autoload. |
 | `scripts/hud.gd` | Shows the speed, the race info, the countdown and the finish screen. |
 | `scripts/race.gd` | The game rules: countdown, timer, which checkpoint is next, the finish. |
 | `scripts/checkpoint.gd` | Notices when the car drives through a checkpoint, and changes its colour. |
@@ -551,13 +581,49 @@ _race_button.pressed.connect(_on_mode_pressed.bind("point_to_point"))
 `bind(...)` adds an extra value to the call, so both mode buttons can use
 the same function and it still knows which one was pressed.
 
+### Controllers and the Input Map
+
+The game never asks "is the W key down?". It asks about **actions**, like
+`accelerate`, `steer_left` or `pause`. Open **Project > Project Settings >
+Input Map** and you'll see each action with everything that triggers it: for
+`accelerate` that's W, the Up arrow, and the controller's right trigger
+("Joypad Axis 5 +"). `car.gd` just does
+
+```gdscript
+throttle = Input.get_axis("brake", "accelerate")
+```
+
+and gets a number from -1 to 1, whatever you pressed. A key is always all or
+nothing (0 or 1), but a trigger or stick gives every value in between, so
+squeezing the trigger halfway gives half power and a small push on the stick
+steers a little. Each action has a **dead zone** (0.2 here): sticks never
+rest at exactly zero, so anything under 20% counts as not pushed at all.
+
+Godot calls controllers **joypads**, and it names their buttons by where
+they sit on an Xbox pad: the bottom face button is "A" even on a PlayStation
+pad, where it says Cross. It knows the layouts of hundreds of controllers, so
+the same Input Map works for Xbox, PlayStation and most others.
+
+The menus use Godot's built-in `ui_` actions (`ui_up`, `ui_accept`,
+`ui_cancel` and so on). Buttons and lists already react to them, so a
+controller can move between buttons as soon as one button has the
+**focus** (that's why each screen calls `grab_focus()` on a button when it
+opens). Godot doesn't put controller buttons on `ui_accept` and
+`ui_cancel` by default, so this project adds A and B to them.
+
+One gotcha: a stick sends a stream of events while you hold it over, not just
+one. On the car-select screen, `event.is_action_pressed("steer_right")` is
+true for every one of them, so a single push would flick through all the
+cars. `Input.is_action_just_pressed_by_event("steer_right", event)` is only
+true for the one event that pushed the stick past its dead zone.
+
 ### Pausing
 
 `get_tree().paused = true` freezes the game. Every node has a
 **Process > Mode** setting in the Inspector. Nodes set to "Inherit" or
 "Pausable" (almost all of them) stop when the game is paused. The
 `PauseMenu` is set to "Always", so it keeps running and can hear you press
-Esc again. The race timer is a normal pausable node, so it stops too.
+Esc (or Menu / Options on a controller) again. The race timer is a normal pausable node, so it stops too.
 
 ### Checkpoints and the timer
 

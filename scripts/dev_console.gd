@@ -21,6 +21,7 @@ const COMMANDS := {
 	"unlock_all": "Unlocks every car upgrade, without finding the places.",
 	"relock": "Undoes unlock_all. Places you really found keep their upgrades.",
 	"upgrades": "Lists the upgrades and whether each one is unlocked.",
+	"dev": "Opens Experimental mode, a hidden test copy of Explore.",
 	"clear": "Empties this console.",
 }
 
@@ -163,6 +164,16 @@ func _cmd_upgrades() -> void:
 		_print("  %s (%s): %s" % [upgrade.display_name, upgrade.slot, state])
 	if Upgrades.unlock_all_on():
 		_print("  (unlock_all is on)")
+
+
+func _cmd_dev() -> void:
+	_print("Opening Experimental mode. Pick a car and press Drive!")
+	# Close the console first. That also unpauses the game, so the next screen
+	# doesn't start frozen.
+	_set_open(false)
+	get_tree().paused = false
+	GameMode.select("experimental")
+	get_tree().change_scene_to_file(GameMode.selected().first_screen)
 
 
 func _cmd_clear() -> void:

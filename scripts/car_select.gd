@@ -231,7 +231,7 @@ func _on_back_pressed() -> void:
 		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
-# "Point to point: Green Valley", or just "Explore".
+# "Point to point: Green Valley", or just "Explore" (or "Experimental").
 func _title() -> String:
 	var mode := GameMode.selected()
 	if mode.id == "point_to_point":

@@ -108,6 +108,7 @@ press **Enter**:
 | `unlock_all` | Unlocks all 12 upgrades, so you can fit them on the car-select screen without exploring. |
 | `relock` | Undoes `unlock_all`. Upgrades from places you really found stay unlocked. |
 | `upgrades` | Lists every upgrade and whether it's unlocked. |
+| `dev` | Opens the hidden **Experimental** mode (see [Experimental mode](#experimental-mode-for-testing-new-maps)). |
 | `clear` | Empties the console. |
 
 **↑** and **↓** bring back commands you typed before, and **Esc** closes it.
@@ -130,6 +131,7 @@ so you never need to commit it.
 | `scenes/levels/` | The three point-to-point levels. Each one changes the terrain, the sky and the checkpoints of `race_base.tscn`. |
 | `scenes/level_select.tscn` | The level-select screen, with a map of each level and its route. |
 | `scenes/explore.tscn` | Explore mode: the big map, the points of interest, the camera and its HUD. |
+| `scenes/experimental.tscn` | The hidden Experimental mode: a copy of `explore.tscn` for testing new maps. |
 | `scenes/poi/` | The 12 points of interest, one small scene each. |
 | `scenes/checkpoint.tscn` | One checkpoint (a beam of light and a ring). Each level uses it 9 to 12 times. |
 | `scenes/pause_menu.tscn` | The menu that shows when you press Esc. |
@@ -782,6 +784,33 @@ the game starts.
 To start over, delete `save.cfg` from the game's `user://` folder (the top of
 `scripts/best_time.gd` says where that is on your computer). That also clears
 your best times and locks the upgrades again.
+
+### Experimental mode, for testing new maps
+
+Experimental is a hidden copy of Explore where you can try out a new map
+without breaking the real one. It has no button on the main menu: open the
+dev console (**`** or **F1**), type `dev` and press **Enter**. You land on
+the car-select screen, and **Drive!** takes you to `scenes/experimental.tscn`.
+
+At first `experimental.tscn` is an exact copy of `explore.tscn`, but they're
+two separate files, so change the copy as much as you like:
+
+- Click the `Terrain` node and change its settings in the Inspector, like
+  `Map Seed` (a different number makes completely different hills),
+  `Mountain Height` or `Mud Amount`. Then click **Regenerate** to see it.
+- Click the `Nature` node to change how many trees, rocks and bushes grow.
+- Move, delete or add places under `PointsOfInterest`.
+
+Two settings keep it apart from your real game. On the `Exploration` node,
+`Save Section` is `experimental`, so the places you find are saved in their
+own `[experimental]` section of `user://save.cfg` and your Explore progress
+stays as it was. And `Unlocks Upgrades` is off, so finding places here
+doesn't unlock car upgrades. The upgrades you already unlocked in Explore
+still work here.
+
+When you like a test map, copy the settings over to `explore.tscn` (or make it
+a new mode in `scripts/game_mode.gd`). In Godot you can also press **F6** with
+`experimental.tscn` open to drive it straight away, skipping the menus.
 
 ## Making a desktop build
 

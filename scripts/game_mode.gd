@@ -1,7 +1,7 @@
 class_name GameMode
 ## The ways you can play, and which one you picked last time.
 ##
-## The main menu has a button for each mode. Picking one saves it here and
+## The main menu has a button for each mode (except hidden ones). Picking one saves it here and
 ## opens the mode's first screen: the level select for point to point, the
 ## car select for Explore. "Drive!" on the car-select screen then loads the
 ## scene to play (scene_to_play below).
@@ -20,6 +20,18 @@ const MODES := [
 		"first_screen": "res://scenes/car_select.tscn",
 		"scene": "res://scenes/explore.tscn",
 		"description": "Roam a huge map, ten times wider than the race map, and find all the hidden places.",
+	},
+	{
+		# A hidden test copy of Explore, for trying out new maps. It has no
+		# button on the main menu: type "dev" in the dev console to open it.
+		# It saves the places you find in its own "experimental" section, so it
+		# never changes your Explore progress or unlocks upgrades.
+		"id": "experimental",
+		"name": "Experimental",
+		"first_screen": "res://scenes/car_select.tscn",
+		"scene": "res://scenes/experimental.tscn",
+		"hidden": true,
+		"description": "A test copy of Explore for trying out new maps.",
 	},
 ]
 

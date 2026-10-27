@@ -20,6 +20,13 @@ signal all_discovered
 ## If the car ends up this far below the ground (fell through the world),
 ## it's put back.
 @export var fall_limit := 15.0
+## The section of user://save.cfg where the places you found are saved.
+## Explore uses "explore". Experimental mode uses "experimental", so testing a
+## new map there never changes your real Explore progress.
+@export var save_section := "explore"
+## Whether finding a place unlocks its car upgrade. Only in real Explore mode:
+## upgrades are unlocked by the places in the "explore" save section.
+@export var unlocks_upgrades := true
 
 const SAVE_PATH := "user://save.cfg"
 
@@ -35,12 +42,12 @@ func _ready() -> void:
 			# Stand it on the (flattened) ground. If the terrain dug a bowl
 			# for a pond, that's deeper in the middle, so we add that back.
 			child.global_position.y = terrain.get_height_at(child.global_position) + child.basin_depth
-	for id in load_found():
+	for id in load_found(save_section):
 		found[id] = true
 	# Remember how many there are, so the main menu can show "3 / 12".
 	var file := ConfigFile.new()
 	file.load(SAVE_PATH)
-	file.set_value("explore", "total", points.size())
+	file.set_value(save_section, "total", points.size())
 	file.save(SAVE_PATH)
 	# The car's own "fell off the map" check uses a fixed height, which doesn't
 	# work on a map with deep valleys. We check against the ground instead.
@@ -66,7 +73,7 @@ func is_found(point: PointOfInterest) -> bool:
 
 func _discover(point: PointOfInterest) -> void:
 	found[point.id] = true
-	save_found(found.keys())
+	save_found(found.keys(), save_section)
 	# If you get stuck or fall, you're put back near the last place you found,
 	# on the side you came from, facing it.
 	var away := car.global_position - point.global_position
@@ -80,23 +87,24 @@ func _discover(point: PointOfInterest) -> void:
 
 
 ## The ids of all points of interest found so far (from the save file).
-static func load_found() -> Array:
+## Leave out section to get the ones from Explore mode.
+static func load_found(section := "explore") -> Array:
 	var file := ConfigFile.new()
 	if file.load(SAVE_PATH) != OK:
 		return []
-	return file.get_value("explore", "found", [])
+	return file.get_value(section, "found", [])
 
 
-static func save_found(ids: Array) -> void:
+static func save_found(ids: Array, section := "explore") -> void:
 	var file := ConfigFile.new()
 	file.load(SAVE_PATH)  # Keep anything else that's already saved.
-	file.set_value("explore", "found", ids)
+	file.set_value(section, "found", ids)
 	file.save(SAVE_PATH)
 
 
 ## How many points of interest there are, or 0 if you never played Explore.
-static func total_count() -> int:
+static func total_count(section := "explore") -> int:
 	var file := ConfigFile.new()
 	if file.load(SAVE_PATH) != OK:
 		return 0
-	return file.get_value("explore", "total", 0)
+	return file.get_value(section, "total", 0)

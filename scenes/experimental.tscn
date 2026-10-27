@@ -1,0 +1,318 @@
+[gd_scene load_steps=68 format=3]
+
+[ext_resource type="Script" path="res://scripts/car_spawner.gd" id="1_spawner"]
+[ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
+[ext_resource type="Script" path="res://scripts/explore_hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://scripts/explore_terrain.gd" id="4_terrain"]
+[ext_resource type="Script" path="res://scripts/surface_type.gd" id="5_surface"]
+[ext_resource type="Script" path="res://scripts/exploration.gd" id="6_exploration"]
+[ext_resource type="Script" path="res://scripts/explore_nature.gd" id="7_nature"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="8_pause"]
+[ext_resource type="Material" path="res://materials/terrain.tres" id="9_ground"]
+[ext_resource type="Script" path="res://scripts/compass.gd" id="10_compass"]
+[ext_resource type="Script" path="res://scripts/explore_map.gd" id="44_map"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallA.glb" id="11_tree_pineTallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallB.glb" id="12_tree_pineTallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallC.glb" id="13_tree_pineTallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineTallD.glb" id="14_tree_pineTallD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundA.glb" id="15_tree_pineRoundA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundB.glb" id="16_tree_pineRoundB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineRoundC.glb" id="17_tree_pineRoundC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineDefaultA.glb" id="18_tree_pineDefaultA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineDefaultB.glb" id="19_tree_pineDefaultB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_default.glb" id="20_tree_default"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_oak.glb" id="21_tree_oak"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_fat.glb" id="22_tree_fat"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallA.glb" id="23_stone_smallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallB.glb" id="24_stone_smallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallC.glb" id="25_stone_smallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallD.glb" id="26_stone_smallD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallE.glb" id="27_stone_smallE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallF.glb" id="28_stone_smallF"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_smallG.glb" id="29_stone_smallG"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeA.glb" id="30_stone_largeA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeB.glb" id="31_stone_largeB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeC.glb" id="32_stone_largeC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeD.glb" id="33_stone_largeD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeE.glb" id="34_stone_largeE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_largeF.glb" id="35_stone_largeF"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallA.glb" id="36_stone_tallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallB.glb" id="37_stone_tallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallC.glb" id="38_stone_tallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/stone_tallE.glb" id="39_stone_tallE"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bush.glb" id="40_plant_bush"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushLarge.glb" id="41_plant_bushLarge"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushDetailed.glb" id="42_plant_bushDetailed"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/grass_large.glb" id="43_grass_large"]
+[ext_resource type="PackedScene" path="res://scenes/poi/campsite.tscn" id="50_poi_campsite"]
+[ext_resource type="PackedScene" path="res://scenes/poi/wreck.tscn" id="51_poi_wreck"]
+[ext_resource type="PackedScene" path="res://scenes/poi/standing_stones.tscn" id="52_poi_standing_stones"]
+[ext_resource type="PackedScene" path="res://scenes/poi/stone_head.tscn" id="53_poi_stone_head"]
+[ext_resource type="PackedScene" path="res://scenes/poi/obelisk.tscn" id="54_poi_obelisk"]
+[ext_resource type="PackedScene" path="res://scenes/poi/lookout.tscn" id="55_poi_lookout"]
+[ext_resource type="PackedScene" path="res://scenes/poi/woodcutter.tscn" id="56_poi_woodcutter"]
+[ext_resource type="PackedScene" path="res://scenes/poi/mushrooms.tscn" id="57_poi_mushrooms"]
+[ext_resource type="PackedScene" path="res://scenes/poi/pond.tscn" id="58_poi_pond"]
+[ext_resource type="PackedScene" path="res://scenes/poi/supply_cache.tscn" id="59_poi_supply_cache"]
+[ext_resource type="PackedScene" path="res://scenes/poi/ancient_oak.tscn" id="60_poi_ancient_oak"]
+[ext_resource type="PackedScene" path="res://scenes/poi/tractor.tscn" id="61_poi_tractor"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.22, 0.48, 0.86, 1)
+sky_horizon_color = Color(0.68, 0.82, 0.95, 1)
+ground_bottom_color = Color(0.35, 0.5, 0.3, 1)
+ground_horizon_color = Color(0.68, 0.82, 0.95, 1)
+sun_angle_max = 20.0
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_main")
+tonemap_mode = 1
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_intensity = 1.5
+fog_enabled = true
+fog_light_color = Color(0.72, 0.84, 0.95, 1)
+fog_density = 0.0011
+fog_sky_affect = 0.0
+adjustment_enabled = true
+adjustment_saturation = 1.15
+
+[sub_resource type="Resource" id="SurfaceType_dirt"]
+script = ExtResource("5_surface")
+display_name = "Dirt"
+grip = 1.0
+drag = 0.0
+color = Color(0.47, 0.69, 0.29, 1)
+
+[sub_resource type="Resource" id="SurfaceType_mud"]
+script = ExtResource("5_surface")
+display_name = "Mud"
+grip = 0.45
+drag = 0.35
+color = Color(0.45, 0.31, 0.2, 1)
+
+[sub_resource type="Resource" id="SurfaceType_rock"]
+script = ExtResource("5_surface")
+display_name = "Rock"
+grip = 1.4
+drag = 0.0
+color = Color(0.58, 0.57, 0.6, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hud"]
+font_size = 20
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_race"]
+font_size = 32
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_countdown"]
+font_size = 120
+outline_size = 16
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_found"]
+font_size = 26
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_message"]
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 14.0
+
+[node name="Experimental" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.2
+shadow_enabled = true
+directional_shadow_max_distance = 220.0
+
+[node name="Terrain" type="StaticBody3D" parent="." node_paths=PackedStringArray("points_of_interest_root", "follow")]
+script = ExtResource("4_terrain")
+points_of_interest_root = NodePath("../PointsOfInterest")
+dirt = SubResource("SurfaceType_dirt")
+mud = SubResource("SurfaceType_mud")
+rock = SubResource("SurfaceType_rock")
+ground_material = ExtResource("9_ground")
+follow = NodePath("../ChaseCamera")
+
+[node name="PointsOfInterest" type="Node3D" parent="."]
+
+[node name="Campsite" parent="PointsOfInterest" instance=ExtResource("50_poi_campsite")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, -240)
+
+[node name="Wreck" parent="PointsOfInterest" instance=ExtResource("51_poi_wreck")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -430, 0, 380)
+
+[node name="StandingStones" parent="PointsOfInterest" instance=ExtResource("52_poi_standing_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 700, 0, -500)
+
+[node name="StoneHead" parent="PointsOfInterest" instance=ExtResource("53_poi_stone_head")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -900, 0, -600)
+
+[node name="Obelisk" parent="PointsOfInterest" instance=ExtResource("54_poi_obelisk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 850, 0, 500)
+
+[node name="Lookout" parent="PointsOfInterest" instance=ExtResource("55_poi_lookout")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -460, 0, -860)
+
+[node name="Woodcutter" parent="PointsOfInterest" instance=ExtResource("56_poi_woodcutter")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -950, 0, 400)
+
+[node name="Mushrooms" parent="PointsOfInterest" instance=ExtResource("57_poi_mushrooms")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 560, 0, 180)
+
+[node name="Pond" parent="PointsOfInterest" instance=ExtResource("58_poi_pond")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 760)
+
+[node name="SupplyCache" parent="PointsOfInterest" instance=ExtResource("59_poi_supply_cache")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -560, 0, -330)
+
+[node name="AncientOak" parent="PointsOfInterest" instance=ExtResource("60_poi_ancient_oak")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1000, 0, 120)
+
+[node name="Tractor" parent="PointsOfInterest" instance=ExtResource("61_poi_tractor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 0, 1050)
+
+[node name="Nature" type="Node3D" parent="." node_paths=PackedStringArray("terrain", "follow", "points_of_interest_root")]
+script = ExtResource("7_nature")
+terrain = NodePath("../Terrain")
+follow = NodePath("../ChaseCamera")
+points_of_interest_root = NodePath("../PointsOfInterest")
+tree_scenes = Array[PackedScene]([ExtResource("11_tree_pineTallA"), ExtResource("12_tree_pineTallB"), ExtResource("13_tree_pineTallC"), ExtResource("14_tree_pineTallD"), ExtResource("15_tree_pineRoundA"), ExtResource("16_tree_pineRoundB"), ExtResource("17_tree_pineRoundC"), ExtResource("18_tree_pineDefaultA"), ExtResource("19_tree_pineDefaultB"), ExtResource("20_tree_default"), ExtResource("21_tree_oak"), ExtResource("22_tree_fat")])
+rock_scenes = Array[PackedScene]([ExtResource("23_stone_smallA"), ExtResource("24_stone_smallB"), ExtResource("25_stone_smallC"), ExtResource("26_stone_smallD"), ExtResource("27_stone_smallE"), ExtResource("28_stone_smallF"), ExtResource("29_stone_smallG")])
+boulder_scenes = Array[PackedScene]([ExtResource("30_stone_largeA"), ExtResource("31_stone_largeB"), ExtResource("32_stone_largeC"), ExtResource("33_stone_largeD"), ExtResource("34_stone_largeE"), ExtResource("35_stone_largeF"), ExtResource("36_stone_tallA"), ExtResource("37_stone_tallB"), ExtResource("38_stone_tallC"), ExtResource("39_stone_tallE")])
+bush_scenes = Array[PackedScene]([ExtResource("40_plant_bush"), ExtResource("41_plant_bushLarge"), ExtResource("42_plant_bushDetailed"), ExtResource("43_grass_large")])
+
+[node name="CarSpawner" type="Marker3D" parent="." node_paths=PackedStringArray("camera", "car_users")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("1_spawner")
+camera = NodePath("../ChaseCamera")
+car_users = [NodePath("../Exploration"), NodePath("../HUD")]
+
+[node name="ChaseCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -7)
+current = true
+far = 3000.0
+script = ExtResource("2_camera")
+
+[node name="Exploration" type="Node" parent="." node_paths=PackedStringArray("terrain", "points_root")]
+script = ExtResource("6_exploration")
+terrain = NodePath("../Terrain")
+points_root = NodePath("../PointsOfInterest")
+save_section = "experimental"
+unlocks_upgrades = false
+
+[node name="HUD" type="CanvasLayer" parent="." node_paths=PackedStringArray("exploration")]
+script = ExtResource("3_hud")
+exploration = NodePath("../Exploration")
+start_title = "Experimental"
+
+[node name="SpeedLabel" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -100.0
+offset_right = 800.0
+offset_bottom = -12.0
+grow_vertical = 0
+label_settings = SubResource("LabelSettings_hud")
+vertical_alignment = 2
+
+[node name="FoundLabel" type="Label" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -416.0
+offset_top = 14.0
+offset_right = -16.0
+offset_bottom = 60.0
+grow_horizontal = 0
+label_settings = SubResource("LabelSettings_found")
+horizontal_alignment = 2
+
+[node name="Compass" type="Control" parent="HUD" node_paths=PackedStringArray("exploration")]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 10.0
+offset_right = 300.0
+offset_bottom = 84.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("10_compass")
+exploration = NodePath("../../Exploration")
+
+[node name="Message" type="CenterContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 110.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="HUD/Message"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_message")
+
+[node name="Box" type="VBoxContainer" parent="HUD/Message/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="HUD/Message/Panel/Box"]
+modulate = Color(1, 0.85, 0.2, 1)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Discovered!"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="HUD/Message/Panel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Somewhere"
+horizontal_alignment = 1
+
+[node name="Text" type="Label" parent="HUD/Message/Panel/Box"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Description"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Map" type="Control" parent="HUD" node_paths=PackedStringArray("exploration")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_map")
+exploration = NodePath("../../Exploration")
+
+[node name="Chime" type="AudioStreamPlayer" parent="HUD"]
+volume_db = -4.0
+
+[node name="PauseMenu" parent="." instance=ExtResource("8_pause")]

@@ -8,6 +8,8 @@ extends CanvasLayer
 @export var exploration: Exploration
 ## How long each message stays, in seconds.
 @export var message_time := 5.0
+## The big word in the message you see when you start driving.
+@export var start_title := "Explore!"
 
 @onready var _speed_label: Label = $SpeedLabel
 @onready var _found_label: Label = $FoundLabel
@@ -29,7 +31,7 @@ func _ready() -> void:
 	exploration.discovered.connect(_on_discovered)
 	exploration.all_discovered.connect(_on_all_discovered)
 	_chime.stream = _make_chime()
-	_show_message("Explore!", "Find all %d places" % exploration.points.size(),
+	_show_message(start_title, "Find all %d places" % exploration.points.size(),
 			"Follow the ? on the compass at the top. Press %s for the map." % Controls.button("map"))
 
 
@@ -57,7 +59,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_discovered(point: PointOfInterest) -> void:
 	_chime.play()
 	_show_message("Discovered!", point.display_name, point.description)
-	# Every place has a car upgrade hidden there.
+	# Every place has a car upgrade hidden there (but not in Experimental mode).
+	if not exploration.unlocks_upgrades:
+		return
 	var upgrade := Upgrades.unlocked_by_place(point.id)
 	if upgrade:
 		_show_message("Upgrade unlocked!", upgrade.display_name,

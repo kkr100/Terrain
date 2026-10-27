@@ -1,12 +1,12 @@
-[gd_scene load_steps=68 format=3]
+[gd_scene load_steps=80 format=3]
 
 [ext_resource type="Script" path="res://scripts/car_spawner.gd" id="1_spawner"]
 [ext_resource type="Script" path="res://scripts/chase_camera.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/explore_hud.gd" id="3_hud"]
-[ext_resource type="Script" path="res://scripts/explore_terrain.gd" id="4_terrain"]
+[ext_resource type="Script" path="res://scripts/map_terrain.gd" id="4_terrain"]
 [ext_resource type="Script" path="res://scripts/surface_type.gd" id="5_surface"]
 [ext_resource type="Script" path="res://scripts/exploration.gd" id="6_exploration"]
-[ext_resource type="Script" path="res://scripts/explore_nature.gd" id="7_nature"]
+[ext_resource type="Script" path="res://scripts/map_nature.gd" id="7_nature"]
 [ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="8_pause"]
 [ext_resource type="Material" path="res://materials/terrain.tres" id="9_ground"]
 [ext_resource type="Script" path="res://scripts/compass.gd" id="10_compass"]
@@ -44,6 +44,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushLarge.glb" id="41_plant_bushLarge"]
 [ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushDetailed.glb" id="42_plant_bushDetailed"]
 [ext_resource type="PackedScene" path="res://assets/models/kenney_nature/grass_large.glb" id="43_grass_large"]
+[ext_resource type="Script" path="res://scripts/experimental_map.gd" id="70_map"]
+[ext_resource type="Material" path="res://materials/map_terrain.tres" id="71_map_ground"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineSmallA.glb" id="72_tree_pineSmallA"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineSmallB.glb" id="73_tree_pineSmallB"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineSmallC.glb" id="74_tree_pineSmallC"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_pineSmallD.glb" id="75_tree_pineSmallD"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_palm.glb" id="76_tree_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_palmBend.glb" id="77_tree_palmBend"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_palmShort.glb" id="78_tree_palmShort"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_palmTall.glb" id="79_tree_palmTall"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/tree_plateau.glb" id="80_tree_plateau"]
+[ext_resource type="PackedScene" path="res://assets/models/kenney_nature/plant_bushSmall.glb" id="81_plant_bushSmall"]
 [ext_resource type="PackedScene" path="res://scenes/poi/campsite.tscn" id="50_poi_campsite"]
 [ext_resource type="PackedScene" path="res://scenes/poi/wreck.tscn" id="51_poi_wreck"]
 [ext_resource type="PackedScene" path="res://scenes/poi/standing_stones.tscn" id="52_poi_standing_stones"]
@@ -135,6 +147,20 @@ content_margin_bottom = 14.0
 
 [node name="Experimental" type="Node3D"]
 
+[node name="Map" type="Node" parent="." node_paths=PackedStringArray("terrain", "nature", "points_root", "exploration", "hud", "map_screen", "world_environment")]
+script = ExtResource("70_map")
+terrain = NodePath("../Terrain")
+nature = NodePath("../Nature")
+points_root = NodePath("../PointsOfInterest")
+exploration = NodePath("../Exploration")
+hud = NodePath("../HUD")
+map_screen = NodePath("../HUD/Map")
+world_environment = NodePath("../WorldEnvironment")
+pine_scenes = Array[PackedScene]([ExtResource("11_tree_pineTallA"), ExtResource("12_tree_pineTallB"), ExtResource("13_tree_pineTallC"), ExtResource("14_tree_pineTallD"), ExtResource("15_tree_pineRoundA"), ExtResource("16_tree_pineRoundB"), ExtResource("17_tree_pineRoundC"), ExtResource("18_tree_pineDefaultA"), ExtResource("19_tree_pineDefaultB"), ExtResource("72_tree_pineSmallA"), ExtResource("73_tree_pineSmallB"), ExtResource("74_tree_pineSmallC"), ExtResource("75_tree_pineSmallD")])
+palm_scenes = Array[PackedScene]([ExtResource("76_tree_palm"), ExtResource("77_tree_palmBend"), ExtResource("78_tree_palmShort"), ExtResource("79_tree_palmTall"), ExtResource("80_tree_plateau")])
+desert_boulder_scenes = Array[PackedScene]([ExtResource("30_stone_largeA"), ExtResource("31_stone_largeB"), ExtResource("32_stone_largeC"), ExtResource("33_stone_largeD"), ExtResource("34_stone_largeE"), ExtResource("35_stone_largeF"), ExtResource("36_stone_tallA"), ExtResource("37_stone_tallB"), ExtResource("38_stone_tallC"), ExtResource("39_stone_tallE")])
+desert_bush_scenes = Array[PackedScene]([ExtResource("81_plant_bushSmall"), ExtResource("40_plant_bush"), ExtResource("43_grass_large")])
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_main")
 
@@ -153,6 +179,7 @@ mud = SubResource("SurfaceType_mud")
 rock = SubResource("SurfaceType_rock")
 ground_material = ExtResource("9_ground")
 follow = NodePath("../ChaseCamera")
+map_ground_material = ExtResource("71_map_ground")
 
 [node name="PointsOfInterest" type="Node3D" parent="."]
 

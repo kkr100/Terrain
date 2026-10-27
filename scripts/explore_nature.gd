@@ -241,11 +241,7 @@ func _place_rocks(rng: RandomNumberGenerator, corner: Vector2, data: Dictionary,
 		var spot := _find_spot(rng, corner, placed, radius)
 		if spot == Vector3.INF:
 			continue
-		var surface := terrain.surface_id_at(spot.x, spot.z)
-		if surface == ExploreTerrain.MUD:
-			continue
-		var chance := 0.25 if prefer_rock else 0.5
-		if surface != ExploreTerrain.ROCK and rng.randf() > chance:
+		if not _wants_rock(rng, spot, prefer_rock):
 			continue
 		# Tilt the rock to follow the slope a bit, spin it, and sink it into
 		# the ground so it doesn't float.
@@ -278,11 +274,7 @@ func _place_trees(rng: RandomNumberGenerator, corner: Vector2, data: Dictionary,
 		var spot := _find_spot(rng, corner, placed, radius)
 		if spot == Vector3.INF:
 			continue
-		# Trees grow in forests (where the forest noise is high), with a few
-		# lonely trees in between.
-		if _forest_noise.get_noise_2d(spot.x, spot.z) < 0.08 and rng.randf() > 0.04:
-			continue
-		if terrain.surface_id_at(spot.x, spot.z) != ExploreTerrain.DIRT:
+		if not _wants_tree(rng, spot):
 			continue
 		var rotation_basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * tree_scale)
 		var origin: Vector3 = spot + Vector3.DOWN * (kind.bottom * tree_scale + 0.3)
@@ -303,9 +295,7 @@ func _place_bushes(rng: RandomNumberGenerator, corner: Vector2, data: Dictionary
 		var spot := _find_spot(rng, corner, {}, 0.5)
 		if spot == Vector3.INF:
 			continue
-		if _forest_noise.get_noise_2d(spot.x, spot.z) < -0.15 and rng.randf() > 0.25:
-			continue
-		if terrain.surface_id_at(spot.x, spot.z) != ExploreTerrain.DIRT:
+		if not _wants_bush(rng, spot):
 			continue
 		var k := rng.randi() % _bushes.size()
 		var kind: Dictionary = _bushes[k]
@@ -315,6 +305,30 @@ func _place_bushes(rng: RandomNumberGenerator, corner: Vector2, data: Dictionary
 		data.bushes[k].transforms.append(Transform3D(rotation_basis, origin))
 		data.bushes[k].colors.append(NatureModels.random_tint(rng, 0.2))
 		done += 1
+
+
+# Whether a rock may go on this spot. Boulders ("prefer_rock") like rocky
+# ground best. (scripts/map_nature.gd changes these three for its maps.)
+func _wants_rock(rng: RandomNumberGenerator, spot: Vector3, prefer_rock: bool) -> bool:
+	var surface := terrain.surface_id_at(spot.x, spot.z)
+	if surface == ExploreTerrain.MUD:
+		return false
+	var chance := 0.25 if prefer_rock else 0.5
+	return surface == ExploreTerrain.ROCK or rng.randf() <= chance
+
+
+# Trees grow in forests (where the forest noise is high), with a few lonely
+# trees in between, and only on dirt.
+func _wants_tree(rng: RandomNumberGenerator, spot: Vector3) -> bool:
+	if _forest_noise.get_noise_2d(spot.x, spot.z) < 0.08 and rng.randf() > 0.04:
+		return false
+	return terrain.surface_id_at(spot.x, spot.z) == ExploreTerrain.DIRT
+
+
+func _wants_bush(rng: RandomNumberGenerator, spot: Vector3) -> bool:
+	if _forest_noise.get_noise_2d(spot.x, spot.z) < -0.15 and rng.randf() > 0.25:
+		return false
+	return terrain.surface_id_at(spot.x, spot.z) == ExploreTerrain.DIRT
 
 
 # --- Putting it in the scene (main thread) -----------------------------------

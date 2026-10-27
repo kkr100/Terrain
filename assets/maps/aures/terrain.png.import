@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://cf17pyxah5a70"
+path="res://.godot/imported/terrain.png-6508d8716f58c3ff460f920b2811cdd2.image"
+
+[deps]
+
+source_file="res://assets/maps/aures/terrain.png"
+dest_files=["res://.godot/imported/terrain.png-6508d8716f58c3ff460f920b2811cdd2.image"]
+
+[params]
+

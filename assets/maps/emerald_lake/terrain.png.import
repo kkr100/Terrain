@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://cnl3iagx76ryw"
+path="res://.godot/imported/terrain.png-d17249c74b3f1f32076e97558ebf3b55.image"
+
+[deps]
+
+source_file="res://assets/maps/emerald_lake/terrain.png"
+dest_files=["res://.godot/imported/terrain.png-d17249c74b3f1f32076e97558ebf3b55.image"]
+
+[params]
+

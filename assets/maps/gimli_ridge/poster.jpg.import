@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://b315vmh2swfhx"
+path="res://.godot/imported/poster.jpg-653e6d8b56b7187508328f1bb508e856.image"
+
+[deps]
+
+source_file="res://assets/maps/gimli_ridge/poster.jpg"
+dest_files=["res://.godot/imported/poster.jpg-653e6d8b56b7187508328f1bb508e856.image"]
+
+[params]
+

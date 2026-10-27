@@ -22,6 +22,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		_set_paused(not get_tree().paused)
 		get_viewport().set_input_as_handled()
+	elif visible and event.is_action_pressed("ui_cancel"):
+		# "Back" (B / Circle on a controller) closes the menu, like Resume.
+		_set_paused(false)
+		get_viewport().set_input_as_handled()
 
 
 func _set_paused(paused: bool) -> void:

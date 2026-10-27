@@ -23,6 +23,14 @@ extends Camera3D
 @export var look_height := 1.0
 ## The camera never goes lower than this above the ground, in metres.
 @export var ground_clearance := 1.5
+## How far the right stick on a controller turns the camera to the side, in
+## degrees.
+@export var look_angle := 110.0
+
+# How far the camera is turned around the car right now, in radians. 0 is
+# straight behind.
+var _look_yaw := 0.0
+var _looking_back := false
 
 
 func _ready() -> void:
@@ -42,6 +50,17 @@ func _physics_process(delta: float) -> void:
 	# with it, instead of gliding there through the hills.
 	if global_position.distance_to(target.global_position) > distance * 5.0:
 		weight = 1.0
+	# Looking back (clicking the right stick) jumps straight round and back,
+	# like glancing in a mirror, so the camera doesn't glide through the car.
+	var looking_back := Input.is_action_pressed("look_back")
+	if looking_back != _looking_back:
+		_looking_back = looking_back
+		_look_yaw = _wanted_look_yaw()
+		weight = 1.0
+	else:
+		# The right stick swings the camera round smoothly (a bit quicker than
+		# it follows the car).
+		_look_yaw = lerp_angle(_look_yaw, _wanted_look_yaw(), 1.0 - exp(-follow_speed * 2.0 * delta))
 	var new_position := global_position.lerp(_desired_position(), weight)
 	# The smoothing above lags behind, so it could still drag the camera into
 	# a hill. These two checks happen straight away, with no smoothing.
@@ -59,10 +78,22 @@ func _desired_position() -> Vector3:
 	if forward.length() < 0.01:
 		forward = Vector3.BACK
 	forward = forward.normalized()
+	# Looking around: turn that direction, and the camera circles the car.
+	forward = forward.rotated(Vector3.UP, _look_yaw)
 	var wanted := target.global_position - forward * distance + Vector3.UP * height
 	# If the hill behind the car is higher than that, go up over it. The
 	# camera then looks down at the car, which also shows the slope ahead.
 	return _above_ground(wanted)
+
+
+## Which way the right stick asks the camera to look.
+func _wanted_look_yaw() -> float:
+	if Input.is_action_pressed("look_back"):
+		return PI
+	# Pushing right turns the view to the right, so the camera swings round to
+	# the car's left side. The car's right is -X when it faces +Z, which is a
+	# negative turn around the up axis.
+	return -Input.get_axis("look_left", "look_right") * deg_to_rad(look_angle)
 
 
 ## Moves "point" up if it is lower than ground_clearance above the ground.

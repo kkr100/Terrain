@@ -62,15 +62,21 @@ func _process(_delta: float) -> void:
 		_show_level()
 
 
-# _input sees key presses before the buttons do.
+# _input sees key presses (and controller buttons) before the buttons do.
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("steer_left"):
-		_change_level(-1)
+	# Left and right (keys, the D-pad or the left stick) pick a level.
+	if event.is_action("steer_left") or event.is_action("steer_right"):
+		# A stick sends a stream of events while you hold it over, so we can't
+		# just ask "is it pushed?" or one push would flick through every level.
+		# is_action_just_pressed_by_event is only true for the one event that
+		# pushed it past its dead zone.
+		if Input.is_action_just_pressed_by_event("steer_left", event):
+			_change_level(-1)
+		elif Input.is_action_just_pressed_by_event("steer_right", event):
+			_change_level(1)
+		# Either way, don't let it move the focus off the button.
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("steer_right"):
-		_change_level(1)
-		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+	elif event.is_action_pressed("ui_cancel"):
 		# Mark the key as used first: going back removes this screen from the
 		# tree right away, and then get_viewport() would be null.
 		get_viewport().set_input_as_handled()
